@@ -6862,6 +6862,8 @@ body.v3-on #spv-detail-context,body.v3-on #export,body.v3-on .workspace-tabs{dis
 #spv-detail-v3 .v3-month-table .v3-month-head{background:#eaf3fa;color:#1c4b6d;font-weight:700;height:30px;letter-spacing:.04em}
 #spv-detail-v3 .v3-month-table td.inrange{background:#f0f7fd}
 #spv-detail-v3 .v3-month-table td.v3-empty{color:#b9c6d1;font-weight:400}
+#spv-detail-v3 .v3-month-table td.v3-month-sub{font-weight:600;color:#7c8fa0;font-size:11px;background:#f7fafc}
+#spv-detail-v3 .v3-month-table td.v3-month-year{border-top:1px solid #e3ecf3}
 #spv-detail-v3 .v3-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #spv-detail-v3 .v3-mini-grid>div{padding:10px 12px;border:1px solid #e1ebf3;border-radius:8px;background:#f8fbfe}
 #spv-detail-v3 .v3-mini-grid span{display:block;color:#74899b;font-size:11px}
@@ -7615,19 +7617,21 @@ function monthMatrix(snap){
     years[y][m].b*=1+full.bret[i-1]/100;
     years[y][m].n++;
   }
-  var view=stateV3.monthView||'ret';
-  var title=view==='ret'?'月度收益率（%）':view==='bench'?'月度基准收益（%）':'月度超额（pp）';
   var startM=snap.start.slice(0,7),endM=snap.end.slice(0,7);
   var keys=Object.keys(years).sort();
   if(!keys.length)keys=[snap.s.start.slice(0,4)];
-  var head='<thead><tr><th rowspan="2">年份</th><th colspan="12" class="v3-month-head">'+title+'</th></tr><tr>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){return '<th>'+m+'月</th>'}).join('')+'</tr></thead>';
+  var head='<thead><tr><th rowspan="2">年份</th><th colspan="12" class="v3-month-head">月度收益（组合 % / 基准 % / 超额 pp）</th></tr><tr>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){return '<th>'+m+'月</th>'}).join('')+'</tr></thead>';
   var body=keys.map(function(y){
-    return '<tr><td>'+y+'</td>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
-      var rec=years[y]&&years[y][m],ym=y+'-'+String(m).padStart(2,'0'),inr=ym>=startM&&ym<=endM;
-      if(!rec||!rec.n)return '<td class="'+(inr?'inrange ':'')+'v3-empty">—</td>';
-      var a=(rec.r-1)*100,b=(rec.b-1)*100,v=view==='ret'?a:view==='bench'?b:a-b;
-      return '<td class="'+(inr?'inrange ':'')+cls(v)+'">'+v.toFixed(2)+'</td>';
-    }).join('')+'</tr>';
+    var rowsM=[['ret','组合'],['bench','基准'],['excess','超额']].map(function(meta){
+      var kind=meta[0];
+      return '<tr><td class="'+(kind==='ret'?'v3-month-year':'v3-month-sub')+'">'+(kind==='ret'?y:meta[1])+'</td>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
+        var rec=years[y]&&years[y][m],ym=y+'-'+String(m).padStart(2,'0'),inr=ym>=startM&&ym<=endM;
+        if(!rec||!rec.n)return '<td class="'+(inr?'inrange ':'')+'v3-empty">—</td>';
+        var a=(rec.r-1)*100,b=(rec.b-1)*100,v=kind==='ret'?a:kind==='bench'?b:a-b;
+        return '<td class="'+(inr?'inrange ':'')+cls(v)+'">'+v.toFixed(2)+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
+    return rowsM;
   }).join('');
   return '<div class="v3-table-wrap"><table class="v3-table v3-month-table">'+head+'<tbody>'+body+'</tbody></table></div>';
 }
@@ -7657,8 +7661,6 @@ function renderReturns(snap){
   var fnote=fview==='status'?'合计 '+signedMoney(snap.fundIncome)+'；浮动盈亏含买入交易，已实现含卖出交易与分红。':'';
   var ftabs='<div class="v3-mini-tabs">'+[['status','按收益状态'],['source','按收益来源']].map(function(x){return '<button type="button" data-v3-fund="'+x[0]+'" class="'+(fview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
   var mm=monthMatrix(snap);
-  var mview=stateV3.monthView||'ret';
-  var mtabs='<div class="v3-mini-tabs">'+[['ret','组合'],['bench','基准'],['excess','超额']].map(function(x){return '<button type="button" data-v3-month="'+x[0]+'" class="'+(mview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
   var sview=stateV3.stockReturnView||'source';
   var sHold=sum(snap.stocks,function(x){return x.hold}),sBuy=sum(snap.stocks,function(x){return x.buyIncome}),sSell=sum(snap.stocks,function(x){return x.sellIncome}),sDiv=sum(snap.stocks,function(x){return x.div});
   var ssrc=[{label:'持仓涨跌',value:sHold},{label:'买入交易',value:sBuy},{label:'卖出交易',value:sSell},{label:'现金分红',value:sDiv},{label:'合计',value:snap.stockIncome,total:true}];
@@ -7691,7 +7693,7 @@ function renderReturns(snap){
     '<div class="v3-grid-2 even">'+
       stockCard+bondCard+
     '</div>'+
-    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3>'+mtabs+'</div><p class="sub">按年份 × 12 个月展示当前数据区间内的月度收益。</p>'+mm+'</div>'+
+    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3></div><p class="sub">按年份展示每月组合收益（%）、基准收益（%）与超额（pp），超额＝组合−基准。</p>'+mm+'</div>'+
     '<div class="v3-card"><h3>回撤走势</h3><div class="v3-legend"><span><i style="background:#0b8a63"></i>组合（绿色实线）</span><span><i style="background:#6f8194"></i>基准（灰色虚线）</span></div><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算；纵轴范围同时覆盖组合与基准。</div></div>';
 }
 
