@@ -7585,8 +7585,7 @@ function renderSummary(snap){
     '<span class="sep">·</span>'+
     '<span class="item"><span>业绩基准</span><select class="v3-bench-select" data-v3-bench aria-label="切换业绩基准">'+benchOpts+'</select></span>'+
     '</div>';
-  return 
-    metaRow+
+  return metaRow+
     '<div class="v3-kpis">'+kpis+'</div>'+
     '<div class="v3-card v3-trend-wide"><h3>累计收益走势</h3><div class="v3-legend"><span><i style="background:#d33c43"></i>组合</span><span><i style="background:#8397aa"></i>基准</span><span><i style="background:rgba(47,131,184,.25)"></i>超额</span></div><div class="v3-chart" style="margin-top:6px">'+navChart(snap)+'</div></div>'+
     '<div class="v3-grid-2 even">'+
@@ -7652,8 +7651,7 @@ function renderReturns(snap){
   var bondFunds=snap.funds.filter(function(x){return /债券/.test(x.l1n)});
   var bHold=sum(bondFunds,function(x){return x.hold}),bTrade=sum(bondFunds,function(x){return x.buy+x.sell}),bDiv=sum(bondFunds,function(x){return x.div});
   var bondCard='<div class="v3-card"><h3>债券收益分析</h3><p class="sub">债券型基金 / ETF 的持有、买卖与分红收益拆解；合计等于上方「债券贡献」，已包含在「基金贡献」中，不含直接持有债券。</p>'+signedBars([{label:'持有涨跌',value:bHold},{label:'买卖交易',value:bTrade},{label:'现金分红',value:bDiv},{label:'合计',value:snap.bond.income,total:true}])+'<div class="v3-note">与「债券资产」页的区间总收益同源，可直接勾稽。</div></div>';
-  return 
-    '<div class="v3-stats">'+
+  return '<div class="v3-stats">'+
       '<div class="v3-stat"><span>区间收益金额（元）</span><strong>'+num(snap.total,2)+'</strong></div>'+
       '<div class="v3-stat"><span>基金贡献（含货币、债券）</span><strong class="'+cls(snap.fundIncome)+'">'+num(snap.fundIncome,2)+'</strong></div>'+
       '<div class="v3-stat"><span>债券贡献（元）</span><strong class="'+cls(snap.bond.income)+'">'+num(snap.bond.income,2)+'</strong></div>'+
@@ -7761,8 +7759,7 @@ function renderAllocation(snap){
         return '<tr><td>'+(i+1)+'</td><td class="name" title="'+esc(x.name)+'">'+esc(x.name)+'</td><td>'+x.type+' · '+esc(x.sub)+'</td><td>'+num(x.close,2)+'</td><td>'+(snap.nav?x.close/snap.nav*100:0).toFixed(2)+'%</td><td class="'+cls(x.total)+'">'+num(x.total,2)+'</td><td class="'+(x.retPct==null?'':cls(x.retPct))+'">'+(x.retPct==null?'—':pct(x.retPct))+'</td></tr>';
       }).join('')+'</tbody></table></div></div>';
   var catCard='<div class="v3-card"><div class="v3-card-head"><h3>基金分类收益 <span class="v3-chip">收益视角</span></h3>'+fcatTabs+'</div><p class="sub">按 Wind '+(fcat==='l1'?'一级':'二级')+'分类汇总；占比为占基金组合，基金组合含货币基金。</p>'+fundCatTable(snap,fcats)+'</div>';
-  return 
-    '<div class="v3-stats three">'+
+  return '<div class="v3-stats three">'+
       '<div class="v3-stat"><span>专户净资产</span><strong>'+moneyShort(snap.nav)+'</strong></div>'+
       '<div class="v3-stat"><span>投资资产市值（不含货币/现金）</span><strong>'+moneyShort(invested)+'</strong></div>'+
       '<div class="v3-stat"><span>投资资产占比</span><strong>'+(snap.nav?invested/snap.nav*100:0).toFixed(1)+'%</strong></div>'+
