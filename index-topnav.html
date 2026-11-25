@@ -10731,14 +10731,66 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
 #portfolio-operations .po-product .po-kpi{align-self:stretch!important;height:100%!important}
 </style>
 <style id="topnav-final">
-.side{overflow:visible!important}
-.logo.mp-brand{display:flex!important;flex-direction:row;align-items:center;height:54px!important;padding:0 0 0 46px!important;overflow:hidden}
-.logo .mp-brand-copy{display:flex;flex-direction:column;gap:0}
-.logo .mp-brand-main{font-size:14.5px!important}
-.logo .mp-brand-name{font-size:9.5px!important;margin-top:1px!important}
+/* 统一深色导航：品牌、一级入口与二级面板共用一套视觉语言 */
+.side{height:60px!important;min-height:60px!important;padding:0 28px!important;display:flex!important;align-items:stretch!important;flex-wrap:nowrap!important;overflow:visible!important;background:linear-gradient(90deg,#0b223b 0%,#102f50 62%,#12385a 100%)!important;border-bottom:1px solid #2c4e6c!important;box-shadow:0 4px 16px rgba(6,28,48,.16)!important}
+.logo.mp-brand{display:flex!important;flex-direction:row;align-items:center;flex:0 0 auto;min-width:282px;height:60px!important;margin-right:20px;padding:0 0 0 44px!important;overflow:hidden;border:0!important}
+.logo .mp-brand-copy{display:flex;flex-direction:column;justify-content:center;gap:0}
+.logo .mp-brand-main{font-size:15px!important;line-height:1.3!important;letter-spacing:.03em;color:#fff!important}
+.logo .mp-brand-name{font-size:9.5px!important;line-height:1.4!important;margin-top:3px!important;letter-spacing:.04em;color:#8da9c3!important}
+.side .nav-group{position:relative;display:flex;align-items:stretch;flex:0 0 auto}
+.side .nav-group>.group-title{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;height:60px;margin:0;padding:0 22px;color:#b9cde0!important;background:transparent!important;font-size:15px!important;font-weight:500!important;line-height:1!important;letter-spacing:0!important;white-space:nowrap;cursor:pointer;box-shadow:none!important;transition:color .15s,background .15s}
+.side .group-title .gsub{display:none!important}
+.side .nav-group>.group-title:after{content:""!important;position:static!important;width:6px!important;height:6px!important;margin:0 0 4px!important;border:0!important;border-right:1.5px solid currentColor!important;border-bottom:1.5px solid currentColor!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transform:rotate(45deg)!important;transition:transform .15s}
+.side .nav-group:hover>.group-title,.side .nav-group.nav-open>.group-title,.side .nav-group:has(.menu button.active)>.group-title{color:#fff!important;background:rgba(105,184,226,.1)!important;box-shadow:inset 0 -3px 0 #62cfe5!important}
+.side .nav-group:hover>.group-title:after,.side .nav-group.nav-open>.group-title:after{transform:rotate(225deg)!important;margin-bottom:-4px!important}
+.side .nav-group>.menu{display:flex!important;flex-direction:column;gap:0;position:absolute;left:0;top:100%;z-index:200;min-width:266px;margin:0;padding:0 0 6px;border:1px solid #2c516f;border-radius:0 0 10px 10px;background:#102d49;box-shadow:0 18px 44px rgba(4,22,39,.34);overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-5px);transition:opacity .14s,transform .14s,visibility .14s}
+.side .nav-group:hover>.menu,.side .nav-group.nav-open>.menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.side .nav-menu-head{padding:15px 18px 12px;border-bottom:1px solid rgba(151,190,220,.16);background:rgba(255,255,255,.025)}
+.side .nav-menu-head strong{display:block;color:#f4f8fc;font-size:13px;font-weight:600;line-height:1.4}
+.side .nav-menu-head span{display:block;margin-top:4px;color:#84a2bd;font-size:10.5px;line-height:1.4}
+.side .nav-group>.menu button{position:relative;flex:0 0 auto;width:calc(100% - 16px);height:44px!important;min-height:44px;margin:4px 8px 0;padding:0 12px 0 36px!important;border:0!important;border-radius:6px;background:transparent!important;color:#b9cde0!important;text-align:left;font-size:13.5px!important;font-weight:400!important;line-height:44px!important;white-space:nowrap;box-shadow:none!important;cursor:pointer;transition:background .14s,color .14s}
+.side .nav-group>.menu button:before{content:""!important;display:block!important;position:absolute;left:15px;top:50%;width:6px;height:6px;border:1px solid #6f93b2!important;border-radius:2px;background:transparent!important;box-shadow:none!important;transform:translateY(-50%)!important}
+.side .nav-group>.menu button:hover{background:#173f61!important;color:#fff!important}
+.side .nav-group>.menu button:hover:before{border-color:#73d3ea!important}
+.side .nav-group>.menu button.active{background:#1a4a70!important;color:#fff!important;font-weight:600!important;box-shadow:inset 3px 0 0 #66d1e8!important}
+.side .nav-group>.menu button.active:before{border-color:#8ee9f4!important;background:#66d1e8!important}
+.side .nav-group>.menu button:after{display:none!important}
+@media(max-width:900px){.side{padding:0 12px!important;overflow-x:auto!important;overflow-y:visible!important}.logo.mp-brand{min-width:240px;margin-right:4px}.side .nav-group>.group-title{padding:0 15px;font-size:14px!important}}
 </style>
-<script>(function(){var side=document.querySelector(".side");if(!side)return;function bind(w){if(w.dataset.navBound)return;w.dataset.navBound="1";w.addEventListener("mouseenter",function(){w.classList.add("nav-open")});w.addEventListener("mouseleave",function(){w.classList.remove("nav-open")})}
-function wrap(){side.querySelectorAll(".nav-group").forEach(function(w){if(!w.querySelector(".group-title")||!w.querySelector(".menu")){w.remove();return}bind(w)});side.querySelectorAll(".group-title").forEach(function(t){var p=t.parentElement;if(!p)return;if(p.classList.contains("nav-group")||p.classList.contains("statistics-nav-group")&&p.querySelector(".menu")&&p.querySelector(".group-title")===t){}else if(p.classList.contains("statistics-nav-group")||p.classList.contains("po-nav-group")){return}if(t.closest(".nav-group"))return;var nav=t.nextElementSibling;if(!nav||!nav.classList.contains("menu"))return;var w=document.createElement("div");w.className="nav-group";t.parentNode.insertBefore(w,t);w.appendChild(t);w.appendChild(nav)})}wrap();if(window.MutationObserver)new MutationObserver(wrap).observe(side,{childList:true,subtree:true})})();</script></body></html>
+<script>(function(){
+  var side=document.querySelector('.side');if(!side)return;
+  var descriptions={'专户汇总':'跨专户查看收益、债券与股票表现','专户分析':'单专户列表、详情与持仓分析','数据与配置':'数据接入、专户信息与业绩基准维护','经营分析':'经营总览、产品与管理主体分析'};
+  function ensureHeader(w){
+    var title=w.querySelector('.group-title'),menu=w.querySelector('.menu');if(!title||!menu)return;
+    if(menu.querySelector('.nav-menu-head'))return;
+    var name=title.cloneNode(true);name.querySelectorAll('.gsub').forEach(function(x){x.remove()});
+    var text=name.textContent.trim(),head=document.createElement('div');head.className='nav-menu-head';
+    head.innerHTML='<strong></strong><span></span>';head.querySelector('strong').textContent=text;
+    head.querySelector('span').textContent=descriptions[text]||'选择要进入的功能页面';menu.insertBefore(head,menu.firstChild);
+  }
+  function bind(w){
+    ensureHeader(w);if(w.dataset.navBound)return;w.dataset.navBound='1';
+    w.addEventListener('mouseenter',function(){w.classList.add('nav-open')});
+    w.addEventListener('mouseleave',function(){w.classList.remove('nav-open')});
+    w.querySelector('.group-title').addEventListener('click',function(){
+      var open=!w.classList.contains('nav-open');closeAll();if(open)w.classList.add('nav-open');
+    });
+    w.querySelector('.menu').addEventListener('click',function(e){if(e.target.closest('button'))closeAll()});
+  }
+  function closeAll(){side.querySelectorAll('.nav-group.nav-open').forEach(function(w){w.classList.remove('nav-open')})}
+  document.addEventListener('click',function(e){if(!e.target.closest('.nav-group'))closeAll()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll()});
+  function wrap(){
+    side.querySelectorAll('.nav-group').forEach(function(w){if(!w.querySelector('.group-title')||!w.querySelector('.menu'))w.remove()});
+    side.querySelectorAll('.group-title').forEach(function(t){
+      if(t.closest('.nav-group'))return;
+      var nav=t.nextElementSibling;if(!nav||!nav.classList.contains('menu'))return;
+      var w=document.createElement('div');w.className='nav-group';t.parentNode.insertBefore(w,t);w.appendChild(t);w.appendChild(nav);
+    });
+    side.querySelectorAll('.nav-group').forEach(bind);
+  }
+  wrap();if(window.MutationObserver)new MutationObserver(wrap).observe(side,{childList:true,subtree:true});
+})();</script></body></html>
 <style id="overview-two-dimensions-style">
 #mp-simple-analysis{display:none!important}
 #portfolio-operations .mp-shell>.mp-dimension-block{margin-top:10px}
