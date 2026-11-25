@@ -7366,7 +7366,7 @@ function snapshot(id,start,end){
   var top5Rate=nav?top5/nav*100:0,top10Rate=nav?top10/nav*100:0;
   var maxFund=funds.length?Math.max.apply(null,funds.map(function(x){return x.close}))/fundClose*100:0;
 
-  var sources=[{label:'基金',value:fundIncome,color:'#2f83b8'},{label:'股票',value:sum(stocks,function(x){return x.total}),color:'#d3a125'},{label:'未投资现金',value:st.cashIncome,color:'#9fb2c2'}];
+  var sources=[{label:'非债基金',value:fundIncome-bdIncome,color:'#2f83b8'},{label:'债券',value:bdIncome,color:'#d3a125'},{label:'股票',value:sum(stocks,function(x){return x.total}),color:'#d33c43'},{label:'未投资现金',value:st.cashIncome,color:'#9fb2c2'}];
   if(Math.abs(other)>1000)sources.push({label:'其他及待核',value:other,color:'#765aa6'});
   var stockSources=[{label:'持仓涨跌',value:sum(stocks,function(x){return x.hold})},{label:'买入交易',value:sum(stocks,function(x){return x.buyIncome})},{label:'卖出交易',value:sum(stocks,function(x){return x.sellIncome})},{label:'现金分红',value:sum(stocks,function(x){return x.div})}];
   var siMap={};
@@ -7650,15 +7650,15 @@ function renderReturns(snap){
   var mtabs='<div class="v3-mini-tabs">'+[['ret','组合'],['bench','基准'],['excess','超额']].map(function(x){return '<button type="button" data-v3-month="'+x[0]+'" class="'+(mview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
   var bondFunds=snap.funds.filter(function(x){return /债券/.test(x.l1n)});
   var bHold=sum(bondFunds,function(x){return x.hold}),bTrade=sum(bondFunds,function(x){return x.buy+x.sell}),bDiv=sum(bondFunds,function(x){return x.div});
-  var bondCard='<div class="v3-card"><h3>债券收益分析</h3><p class="sub">债券型基金 / ETF 的持有、买卖与分红收益拆解；合计等于上方「债券贡献」，已包含在「基金贡献」中，不含直接持有债券。</p>'+signedBars([{label:'持有涨跌',value:bHold},{label:'买卖交易',value:bTrade},{label:'现金分红',value:bDiv},{label:'合计',value:snap.bond.income,total:true}])+'<div class="v3-note">与「债券资产」页的区间总收益同源，可直接勾稽。</div></div>';
+  var bondCard='<div class="v3-card"><h3>债券收益分析</h3><p class="sub">债券型基金 / ETF 的持有、买卖与分红收益拆解；合计等于上方「债券贡献」及「专户收益来源」的债券收益，不包含在非债基金贡献中，不含直接持有债券。</p>'+signedBars([{label:'持有涨跌',value:bHold},{label:'买卖交易',value:bTrade},{label:'现金分红',value:bDiv},{label:'合计',value:snap.bond.income,total:true}])+'<div class="v3-note">与「债券资产」页的区间总收益同源，可直接勾稽。</div></div>';
   return '<div class="v3-stats">'+
       '<div class="v3-stat"><span>区间收益金额（元）</span><strong>'+num(snap.total,2)+'</strong></div>'+
-      '<div class="v3-stat"><span>基金贡献（含货币、债券）</span><strong class="'+cls(snap.fundIncome)+'">'+num(snap.fundIncome,2)+'</strong></div>'+
+      '<div class="v3-stat"><span>非债基金贡献（含货币）</span><strong class="'+cls(snap.fundIncome-snap.bond.income)+'">'+num(snap.fundIncome-snap.bond.income,2)+'</strong></div>'+
       '<div class="v3-stat"><span>债券贡献（元）</span><strong class="'+cls(snap.bond.income)+'">'+num(snap.bond.income,2)+'</strong></div>'+
       '<div class="v3-stat"><span>股票贡献（元）</span><strong class="'+cls(snap.stockIncome)+'">'+num(snap.stockIncome,2)+'</strong></div>'+
     '</div>'+
     '<div class="v3-grid-2 even">'+
-      '<div class="v3-card"><h3>专户收益来源</h3><p class="sub">基金（含货币）/ 股票 / 未投资现金，合计等于区间收益金额。</p>'+signedBars(src)+'</div>'+
+      '<div class="v3-card"><h3>专户收益来源</h3><p class="sub">非债基金（含货币）/ 债券 / 股票 / 未投资现金，各项互斥，合计等于区间收益金额；债券收益来自债券型基金。</p>'+signedBars(src)+'</div>'+
       '<div class="v3-card"><div class="v3-card-head"><h3>'+ftitle+'</h3>'+ftabs+'</div><p class="sub">'+fsub+'</p>'+signedBars(fbars)+(fnote?'<div class="v3-note">'+fnote+'</div>':'')+'</div>'+
     '</div>'+
     '<div class="v3-grid-2 even">'+
@@ -7962,7 +7962,7 @@ function renderFunds(snap){
       '<div class="v3-basis-switch"><span>收益口径</span>'+fundBasisSwitch()+'</div>'+
       '<span class="v3-count" id="v3-fund-count">'+assetCountText(allRows)+'</span>'+
     '</div><div class="v3-table-wrap"><table class="v3-table left2 fundtable"><thead><tr>'+sortTh('funds','code','基金代码')+sortTh('funds','name','基金名称')+sortTh('funds','type','基金类型')+sortTh('funds','l2','Wind 二级')+sortTh('funds','close','期末市值（元）')+sortTh('funds','weight','占基金组合')+fundBasisThs()+sortTh('funds','income','区间总收益（元）')+sortTh('funds','ret','收益率')+'<th class="v3-expand-th">明细</th></tr></thead><tbody id="v3-fund-rows">'+fundRowsHtml(ps.rows,allRows,snap)+'</tbody></table></div>'+
-    '<div class="v3-pager" id="v3-fund-pager">'+pagerHtml('funds',ps.page,ps.pages,allRows.length)+'</div><div class="v3-note">收益率＝区间总收益 ÷ 期初市值；期初为 0 的新建仓基金显示「—」。合计行与「收益分析」的基金贡献一致；期末市值取最新持仓快照，收益按所选区间折算。</div></div>';
+    '<div class="v3-pager" id="v3-fund-pager">'+pagerHtml('funds',ps.page,ps.pages,allRows.length)+'</div><div class="v3-note">收益率＝区间总收益 ÷ 期初市值；期初为 0 的新建仓基金显示「—」。合计行等于「收益分析」的非债基金贡献与债券贡献之和；期末市值取最新持仓快照，收益按所选区间折算。</div></div>';
   return head+(sub?'<p class="v3-sub">'+sub+'</p>':'')+stats+(view==='chart'?fundChartView(snap):list);
 }
 
