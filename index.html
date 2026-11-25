@@ -6869,6 +6869,7 @@ body.v3-on #spv-detail-context,body.v3-on #export,body.v3-on .workspace-tabs{dis
 #spv-detail-v3 .v3-year-sep.v3-year-toggle:hover td{background:#dfedf7}
 #spv-detail-v3 .v3-year-arrow{display:inline-block;width:14px;color:#3d6d96}
 #spv-detail-v3 .v3-year-hint{margin-left:8px;font-weight:400;font-size:11px;color:#8aa5bb}
+#spv-detail-v3 .v3-year-sum{float:right;font-weight:600;font-size:11px;color:#3d6d96}
 #spv-detail-v3 .v3-year-hidden{display:none}
 #spv-detail-v3 .v3-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #spv-detail-v3 .v3-mini-grid>div{padding:10px 12px;border:1px solid #e1ebf3;border-radius:8px;background:#f8fbfe}
@@ -7628,20 +7629,24 @@ function monthMatrix(snap){
   if(!keys.length)keys=[snap.s.start.slice(0,4)];
   var openYears=stateV3.monthOpen||(stateV3.monthOpen={});
   keys.forEach(function(y,i){openYears[y]=keys.length<=2?true:(openYears[y]===undefined?(i>=keys.length-2):openYears[y])});
-  var head='<thead><tr><th rowspan="2">年份</th><th colspan="12" class="v3-month-head">月度收益（组合 % / 基准 % / 超额 pp）</th></tr><tr>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){return '<th>'+m+'月</th>'}).join('')+'</tr></thead>';
+  var head='<thead><tr><th rowspan="2">年份</th><th colspan="12" class="v3-month-head">月度收益（组合 % / 超额 pp；悬浮单元格查看基准）</th></tr><tr>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){return '<th>'+m+'月</th>'}).join('')+'</tr></thead>';
   var body=keys.map(function(y){
     var isOpen=openYears[y];
-    var rowsM=[['ret','组合'],['bench','基准'],['excess','超额']].map(function(meta){
+    var rowsM=[['ret','组合'],['excess','超额']].map(function(meta){
       var kind=meta[0];
       return '<tr class="v3-year-rows'+(isOpen?'':' v3-year-hidden')+'" data-v3-year="'+y+'"><td class="v3-month-sub">'+meta[1]+'</td>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
         var rec=years[y]&&years[y][m],ym=y+'-'+String(m).padStart(2,'0'),inr=ym>=startM&&ym<=endM;
-        if(!rec||!rec.n)return '<td class="'+(inr?'inrange ':'')+'v3-empty">—</td>';
-        var a=(rec.r-1)*100,b=(rec.b-1)*100,v=kind==='ret'?a:kind==='bench'?b:a-b;
-        return '<td class="'+(inr?'inrange ':'')+cls(v)+'">'+v.toFixed(2)+'</td>';
+        if(!rec||!rec.n)return '<td class="'+(inr?'inrange ':'')+'v3-empty">';
+        var a=(rec.r-1)*100,b=(rec.b-1)*100,v=kind==='ret'?a:a-b;
+        var tip='组合 '+a.toFixed(2)+'% · 基准 '+b.toFixed(2)+'% · 超额 '+(a-b).toFixed(2)+'pp';
+        return '<td title="'+tip+'" class="'+(inr?'inrange ':'')+cls(v)+'">'+v.toFixed(2)+'</td>';
       }).join('')+'</tr>';
     }).join('');
+    var yr=1,yb=1,n=0;
+    Object.keys(years[y]).forEach(function(m){yr*=years[y][m].r;yb*=years[y][m].b;n+=years[y][m].n});
+    var ySum=n>0?'全年组合 '+((yr-1)*100).toFixed(2)+'% · 超额 '+((yr-yb)*100).toFixed(2)+'pp':'';
     var tog=keys.length>2;
-    var sep='<tr class="v3-year-sep'+(tog?' v3-year-toggle':'')+'" data-v3-year-sep="'+y+'"><td colspan="13">'+(tog?'<span class="v3-year-arrow">'+(isOpen?'▾':'▸')+'</span> ':'')+y+'年'+(tog?'<span class="v3-year-hint">'+(isOpen?'点击收起':'点击展开')+'</span>':'')+'</td></tr>';
+    var sep='<tr class="v3-year-sep'+(tog?' v3-year-toggle':'')+'" data-v3-year-sep="'+y+'"><td colspan="13">'+(tog?'<span class="v3-year-arrow">'+(isOpen?'▾':'▸')+'</span> ':'')+y+'年'+(tog?'<span class="v3-year-hint">'+(isOpen?'点击收起':'点击展开')+'</span>':'')+'<span class="v3-year-sum">'+ySum+'</span></td></tr>';
     return sep+rowsM;
   }).join('');
   return '<div class="v3-table-wrap"><table class="v3-table v3-month-table">'+head+'<tbody>'+body+'</tbody></table></div>';
@@ -7704,7 +7709,7 @@ function renderReturns(snap){
     '<div class="v3-grid-2 even">'+
       stockCard+bondCard+
     '</div>'+
-    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3></div><p class="sub">按年份展示每月组合收益（%）、基准收益（%）与超额（pp），超额＝组合−基准。</p>'+mm+'</div>'+
+    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3></div><p class="sub">按年份展示每月组合收益（%）与超额（pp），超额＝组合−基准；鼠标悬浮单元格可同时查看组合、基准与超额，年份行右侧为全年汇总。</p>'+mm+'</div>'+
     '<div class="v3-card"><h3>回撤走势</h3><div class="v3-legend"><span><i style="background:#0b8a63"></i>组合（绿色实线）</span><span><i style="background:#6f8194"></i>基准（灰色虚线）</span></div><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算；纵轴范围同时覆盖组合与基准。</div></div>';
 }
 
