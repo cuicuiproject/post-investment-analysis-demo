@@ -7633,7 +7633,7 @@ function monthMatrix(snap){
     var isOpen=openYears[y];
     var rowsM=[['ret','组合'],['bench','基准'],['excess','超额']].map(function(meta){
       var kind=meta[0];
-      return '<tr class="v3-year-rows'+(isOpen?'':' v3-year-hidden')+'" data-v3-year="'+y+'"><td class="'+(kind==='ret'?'v3-month-year':'v3-month-sub')+'">'+(kind==='ret'?y:meta[1])+'</td>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
+      return '<tr class="v3-year-rows'+(isOpen?'':' v3-year-hidden')+'" data-v3-year="'+y+'"><td class="v3-month-sub">'+meta[1]+'</td>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(m){
         var rec=years[y]&&years[y][m],ym=y+'-'+String(m).padStart(2,'0'),inr=ym>=startM&&ym<=endM;
         if(!rec||!rec.n)return '<td class="'+(inr?'inrange ':'')+'v3-empty">—</td>';
         var a=(rec.r-1)*100,b=(rec.b-1)*100,v=kind==='ret'?a:kind==='bench'?b:a-b;
