@@ -777,16 +777,26 @@ body.pp-lock{overflow:hidden}
 .btn#export:hover,.btn#export-post-data:hover,.btn#benchmark-export:hover,#im-export-account:hover,#im-export-fund:hover,.module-export-btn:hover{background:#e2a40f!important;border-color:#c8900a!important;color:#312200!important}
 </style>
 
-<style>/* ===== 顶导航演示覆盖层 ===== */
-.side{display:flex;align-items:center;flex-wrap:wrap;gap:0 4px;padding:0 14px;background:#fff;border-bottom:1px solid var(--line);border-right:0;position:sticky;top:0;z-index:80}
-.logo{height:46px;border-bottom:0;padding:4px 0 0 30px;display:flex;flex-direction:column;justify-content:center;font-size:14px}
-.group-title{padding:0;margin:0 2px 0 8px;font-size:11px;color:#8a9caf;letter-spacing:.08em}
-.menu{display:flex;flex-wrap:wrap}
-.menu button{height:46px;padding:0 9px;border:0;border-bottom:2px solid transparent;background:transparent;text-align:center;font-size:12.5px;white-space:nowrap}
-.menu button.active{background:transparent;color:var(--b);border-bottom-color:var(--b);font-weight:700}
-.menu button.fund-detail-nav-mark:after{right:auto;left:50%;transform:translateX(-50%);bottom:8px}
-@media(min-width:901px){.layout{display:block}.side{position:sticky;inset:auto;width:auto;height:auto;overflow:visible}.main{margin-left:0}}
-@media(max-width:900px){.side{position:sticky;top:0;inset:auto;width:100%;height:auto;overflow:visible}}
+<style>/* ===== 顶导航覆盖层 v2：一级导航+悬停二级面板 ===== */
+@media(min-width:901px){.layout{display:block}.main{margin-left:0}.side{position:sticky;inset:auto;width:auto;height:auto;min-height:54px;max-height:none;overflow:visible}}
+.side{position:sticky;top:0;z-index:120;display:flex;align-items:stretch;flex-wrap:wrap;height:auto;min-height:54px;padding:0 16px;background:#fff;border-bottom:1px solid var(--line);border-right:0;box-shadow:0 2px 12px #17395714;overflow:visible}
+.logo{display:flex;flex-direction:row;align-items:center;gap:6px;height:54px!important;overflow:hidden;border-bottom:0;padding:0 0 0 44px;font-size:15px;white-space:nowrap}
+.logo .mp-brand-copy,.logo .brand-sub{height:auto;line-height:1.2}
+.logo .brand-mark{top:50%;transform:translateY(-50%)}
+.logo .brand-sub{font-size:9px;color:#93a1b1;font-weight:400}
+.nav-group{position:relative;display:flex;align-items:stretch}
+.group-title{display:flex;align-items:center;height:54px;margin:0;padding:0 18px;font-size:14px;font-weight:600;color:#2e405a;letter-spacing:0;cursor:pointer;white-space:nowrap;user-select:none}
+.nav-group:hover>.group-title,.nav-group:has(.menu button.active)>.group-title{color:var(--b);box-shadow:inset 0 -2px 0 var(--b)}
+.nav-group:has(.menu button.active)>.group-title:after{content:"";width:6px;height:6px;margin-left:6px;border-radius:50%;background:#2ec7d3}
+.menu{display:none;position:absolute;left:0;top:100%;z-index:130;flex-direction:column;gap:2px;min-width:200px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 44px #10263f26}
+.nav-group:hover>.menu,.nav-group.nav-open>.menu{display:flex}
+.menu button{height:38px;padding:0 14px;border:0;border-radius:7px;background:transparent;text-align:left;font-size:13.5px;color:#2e405a;white-space:nowrap;cursor:pointer}
+.menu button:hover{background:#eef4fb;color:var(--b)}
+.menu button.active{background:var(--b);color:#fff;font-weight:600}
+.nav-group .menu button{padding-left:14px}
+.nav-group .menu button:before{display:none}
+.menu button.fund-detail-nav-mark:after{right:12px;left:auto;bottom:auto;top:50%;transform:translateY(-50%)}
+@media(max-width:900px){.side{position:sticky;top:0}.menu{left:8px}}
 </style>
 </head><body><div class="layout"><aside class="side"><div class="logo"><span class="brand-mark" aria-hidden="true"></span>渤银理财投后分析<span class="brand-sub">POST-INVESTMENT INTELLIGENCE</span></div><div class="group-title">投后分析</div><nav class="menu"><button class="active" data-page="overview">专户分析</button><button data-page="post">专户持仓分析</button><button data-page="bond-analysis" hidden>债券分析</button></nav><div class="group-title">数据维护</div><nav class="menu"><button data-page="upload">上传数据</button><button data-page="history">上传历史</button><button data-page="manage">专户管理</button></nav></aside><main class="main"><header class="top"><div id="crumb" class="crumb">专户分析 <span>/</span>专户列表</div><button class="btn" id="export">导出数据</button></header><div class="content">
 <style id="overview-hero-switch-ptype">
@@ -10720,7 +10730,15 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
 #portfolio-operations .po-product .po-kpis{align-items:stretch!important;grid-auto-rows:1fr!important}
 #portfolio-operations .po-product .po-kpi{align-self:stretch!important;height:100%!important}
 </style>
-</body></html>
+<style id="topnav-final">
+.side{overflow:visible!important}
+.logo.mp-brand{display:flex!important;flex-direction:row;align-items:center;height:54px!important;padding:0 0 0 46px!important;overflow:hidden}
+.logo .mp-brand-copy{display:flex;flex-direction:column;gap:0}
+.logo .mp-brand-main{font-size:14.5px!important}
+.logo .mp-brand-name{font-size:9.5px!important;margin-top:1px!important}
+</style>
+<script>(function(){var side=document.querySelector(".side");if(!side)return;function bind(w){if(w.dataset.navBound)return;w.dataset.navBound="1";w.addEventListener("mouseenter",function(){w.classList.add("nav-open")});w.addEventListener("mouseleave",function(){w.classList.remove("nav-open")})}
+function wrap(){side.querySelectorAll(".nav-group").forEach(function(w){if(!w.querySelector(".group-title")||!w.querySelector(".menu")){w.remove();return}bind(w)});side.querySelectorAll(".group-title").forEach(function(t){var p=t.parentElement;if(!p)return;if(p.classList.contains("nav-group")||p.classList.contains("statistics-nav-group")&&p.querySelector(".menu")&&p.querySelector(".group-title")===t){}else if(p.classList.contains("statistics-nav-group")||p.classList.contains("po-nav-group")){return}if(t.closest(".nav-group"))return;var nav=t.nextElementSibling;if(!nav||!nav.classList.contains("menu"))return;var w=document.createElement("div");w.className="nav-group";t.parentNode.insertBefore(w,t);w.appendChild(t);w.appendChild(nav)})}wrap();if(window.MutationObserver)new MutationObserver(wrap).observe(side,{childList:true,subtree:true})})();</script></body></html>
 <style id="overview-two-dimensions-style">
 #mp-simple-analysis{display:none!important}
 #portfolio-operations .mp-shell>.mp-dimension-block{margin-top:10px}
