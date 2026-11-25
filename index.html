@@ -6870,6 +6870,7 @@ body.v3-on #spv-detail-context,body.v3-on #export,body.v3-on .workspace-tabs{dis
 #spv-detail-v3 .v3-year-arrow{display:inline-block;width:14px;color:#3d6d96}
 #spv-detail-v3 .v3-year-hint{margin-left:8px;font-weight:400;font-size:11px;color:#8aa5bb}
 #spv-detail-v3 .v3-year-sum{float:right;font-weight:600;font-size:11px;color:#3d6d96}
+#spv-detail-v3 .v3-year-sim{margin-left:6px;font-weight:400;font-size:10px;color:#a2680f;background:#fdf1dd;border:1px solid #ecd9b0;border-radius:8px;padding:1px 6px;vertical-align:1px}
 #spv-detail-v3 .v3-year-hidden{display:none}
 #spv-detail-v3 .v3-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #spv-detail-v3 .v3-mini-grid>div{padding:10px 12px;border:1px solid #e1ebf3;border-radius:8px;background:#f8fbfe}
@@ -7624,6 +7625,20 @@ function monthMatrix(snap){
     years[y][m].b*=1+full.bret[i-1]/100;
     years[y][m].n++;
   }
+  var simYears={},realKeys=Object.keys(years).sort();
+  if(realKeys.length&&+realKeys[0]>2022){
+    var fy=+realKeys[0];
+    [fy-2,fy-1].forEach(function(y){
+      simYears[y]=true;
+      for(var m=1;m<=12;m++){
+        if(!years[y])years[y]={};
+        if(!years[y][m]){
+          var a=0.9*Math.sin((m+y*3)*1.1)+0.35,bb=0.22+0.05*Math.sin(m*0.7+y);
+          years[y][m]={r:1+a/100,b:1+bb/100,n:1};
+        }
+      }
+    });
+  }
   var startM=snap.start.slice(0,7),endM=snap.end.slice(0,7);
   var keys=Object.keys(years).sort();
   if(!keys.length)keys=[snap.s.start.slice(0,4)];
@@ -7646,10 +7661,11 @@ function monthMatrix(snap){
     Object.keys(years[y]).forEach(function(m){yr*=years[y][m].r;yb*=years[y][m].b;n+=years[y][m].n});
     var ySum=n>0?'全年组合 '+((yr-1)*100).toFixed(2)+'% · 超额 '+((yr-yb)*100).toFixed(2)+'pp':'';
     var tog=keys.length>2;
-    var sep='<tr class="v3-year-sep'+(tog?' v3-year-toggle':'')+'" data-v3-year-sep="'+y+'"><td colspan="13">'+(tog?'<span class="v3-year-arrow">'+(isOpen?'▾':'▸')+'</span> ':'')+y+'年'+(tog?'<span class="v3-year-hint">'+(isOpen?'点击收起':'点击展开')+'</span>':'')+'<span class="v3-year-sum">'+ySum+'</span></td></tr>';
+    var sep='<tr class="v3-year-sep'+(tog?' v3-year-toggle':'')+'" data-v3-year-sep="'+y+'"><td colspan="13">'+(tog?'<span class="v3-year-arrow">'+(isOpen?'▾':'▸')+'</span> ':'')+y+'年'+(simYears[y]?'<span class="v3-year-sim">模拟</span>':'')+(tog?'<span class="v3-year-hint">'+(isOpen?'点击收起':'点击展开')+'</span>':'')+'<span class="v3-year-sum">'+ySum+'</span></td></tr>';
     return sep+rowsM;
   }).join('');
-  return '<div class="v3-table-wrap"><table class="v3-table v3-month-table">'+head+'<tbody>'+body+'</tbody></table></div>';
+  var simNote=Object.keys(simYears).length?'<div class="v3-note">'+Object.keys(simYears).sort().join('、')+' 年为模拟数据，仅用于演示多年份展示效果，接入更早净值后自动替换。</div>':'';
+  return '<div class="v3-table-wrap"><table class="v3-table v3-month-table">'+head+'<tbody>'+body+'</tbody></table></div>'+simNote;
 }
 function monthStats(snap){
   var m={},i;
