@@ -7115,7 +7115,7 @@ var BM_INDUSTRY={'银行':20,'食品饮料':15,'电子':15,'电力设备':12,'�
 var TAB_LABEL={summary:'综合概览',returns:'收益分析',allocation:'持仓结构',funds:'基金/ETF资产',bonds:'债券资产',stocks:'股票资产'};
 var TAB_ORDER=['summary','returns','allocation','funds','bonds','stocks'];
 
-var stateV3={tab:'summary',spv:null,start:'',end:'',type:'all',l1:'all',l2:'all',wcL1:'',wcOpen:false,q:'',industry:'',monthView:'ret',fundView:'source',fundCat:'l2',fundAssetView:'list',bondAssetView:'list',stockAssetView:'list',allocView:'look',fundPage:1,stockPage:1,fundBasis:'source',stockBasis:'source',fundsSort:{key:'close',dir:-1},stocksSort:{key:'close',dir:-1},bench:{}};
+var stateV3={tab:'summary',spv:null,start:'',end:'',type:'all',l1:'all',l2:'all',wcL1:'',wcOpen:false,q:'',industry:'',monthView:'ret',fundView:'source',stockReturnView:'source',bondReturnView:'source',fundCat:'l2',fundAssetView:'list',bondAssetView:'list',stockAssetView:'list',allocView:'look',fundPage:1,stockPage:1,fundBasis:'source',stockBasis:'source',fundsSort:{key:'close',dir:-1},stocksSort:{key:'close',dir:-1},bench:{}};
 var chartStore={};
 var current=null,cacheKey='',cacheVal=null;
 
@@ -7659,9 +7659,25 @@ function renderReturns(snap){
   var mm=monthMatrix(snap);
   var mview=stateV3.monthView||'ret';
   var mtabs='<div class="v3-mini-tabs">'+[['ret','组合'],['bench','基准'],['excess','超额']].map(function(x){return '<button type="button" data-v3-month="'+x[0]+'" class="'+(mview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
+  var sview=stateV3.stockReturnView||'source';
+  var sHold=sum(snap.stocks,function(x){return x.hold}),sBuy=sum(snap.stocks,function(x){return x.buyIncome}),sSell=sum(snap.stocks,function(x){return x.sellIncome}),sDiv=sum(snap.stocks,function(x){return x.div});
+  var ssrc=[{label:'持仓涨跌',value:sHold},{label:'买入交易',value:sBuy},{label:'卖出交易',value:sSell},{label:'现金分红',value:sDiv},{label:'合计',value:snap.stockIncome,total:true}];
+  var sstat=[{label:'浮动盈亏',value:sHold+sBuy},{label:'已实现收益',value:sSell+sDiv},{label:'合计',value:snap.stockIncome,total:true}];
+  var sbars=sview==='status'?sstat:ssrc;
+  var stabs='<div class="v3-mini-tabs">'+[['status','按收益状态'],['source','按收益来源']].map(function(x){return '<button type="button" data-v3-stock-return="'+x[0]+'" class="'+(sview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
+  var ssub=sview==='status'?'浮动盈亏 ＋ 已实现收益 ＝ 股票区间收益。':'持仓涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 股票区间收益；分红按行业模拟估算，交易收益按买卖成交额比例拆分。';
+  var snote=sview==='status'?'合计 '+signedMoney(snap.stockIncome)+'；浮动盈亏含买入交易，已实现含卖出交易与分红。':'';
+  var stockCard='<div class="v3-card"><div class="v3-card-head"><h3>股票收益分析</h3>'+stabs+'</div><p class="sub">'+ssub+'</p>'+signedBars(sbars)+(snote?'<div class="v3-note">'+snote+'</div>':'')+'</div>';
   var bondFunds=snap.funds.filter(function(x){return /债券/.test(x.l1n)});
-  var bHold=sum(bondFunds,function(x){return x.hold}),bTrade=sum(bondFunds,function(x){return x.buy+x.sell}),bDiv=sum(bondFunds,function(x){return x.div});
-  var bondCard='<div class="v3-card"><h3>债券收益分析</h3><p class="sub">债券型基金 / ETF 的持有、买卖与分红收益拆解；合计等于上方「债券贡献」及「专户收益来源」的债券收益，不包含在非债基金贡献中，不含直接持有债券。</p>'+signedBars([{label:'持有涨跌',value:bHold},{label:'买卖交易',value:bTrade},{label:'现金分红',value:bDiv},{label:'合计',value:snap.bond.income,total:true}])+'</div>';
+  var bview=stateV3.bondReturnView||'source';
+  var bHold=sum(bondFunds,function(x){return x.hold}),bBuy=sum(bondFunds,function(x){return x.buy}),bSell=sum(bondFunds,function(x){return x.sell}),bDiv=sum(bondFunds,function(x){return x.div});
+  var bsrc=[{label:'持有涨跌',value:bHold},{label:'买入交易',value:bBuy},{label:'卖出交易',value:bSell},{label:'现金分红',value:bDiv},{label:'合计',value:snap.bond.income,total:true}];
+  var bstat=[{label:'浮动盈亏',value:bHold+bBuy},{label:'已实现收益',value:bSell+bDiv},{label:'合计',value:snap.bond.income,total:true}];
+  var bbars=bview==='status'?bstat:bsrc;
+  var btabs='<div class="v3-mini-tabs">'+[['status','按收益状态'],['source','按收益来源']].map(function(x){return '<button type="button" data-v3-bond-return="'+x[0]+'" class="'+(bview===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
+  var bsub=bview==='status'?'浮动盈亏 ＋ 已实现收益 ＝ 债券区间收益；与上方债券贡献一致。':'持有涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 债券区间收益；与上方债券贡献一致，不含直接持有债券。';
+  var bnote=bview==='status'?'合计 '+signedMoney(snap.bond.income)+'；浮动盈亏含买入交易，已实现含卖出交易与分红。':'';
+  var bondCard='<div class="v3-card"><div class="v3-card-head"><h3>债券收益分析</h3>'+btabs+'</div><p class="sub">'+bsub+'</p>'+signedBars(bbars)+(bnote?'<div class="v3-note">'+bnote+'</div>':'')+'</div>';
   return '<div class="v3-stats">'+
       '<div class="v3-stat"><span>区间收益金额（元）</span><strong>'+num(snap.total,2)+'</strong></div>'+
       '<div class="v3-stat"><span>非债基金贡献（含货币）</span><strong class="'+cls(snap.fundIncome-snap.bond.income)+'">'+num(snap.fundIncome-snap.bond.income,2)+'</strong></div>'+
@@ -7673,8 +7689,7 @@ function renderReturns(snap){
       '<div class="v3-card"><div class="v3-card-head"><h3>'+ftitle+'</h3>'+ftabs+'</div><p class="sub">'+fsub+'</p>'+signedBars(fbars)+(fnote?'<div class="v3-note">'+fnote+'</div>':'')+'</div>'+
     '</div>'+
     '<div class="v3-grid-2 even">'+
-      '<div class="v3-card"><h3>股票收益来源</h3><p class="sub">持仓涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 股票区间收益；分红按行业模拟估算，交易收益按买卖成交额比例拆分。</p>'+signedBars(snap.stockSources.concat([{label:'合计',value:snap.stockIncome,total:true}]))+'</div>'+
-      bondCard+
+      stockCard+bondCard+
     '</div>'+
     '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3>'+mtabs+'</div><p class="sub">按年份 × 12 个月展示当前数据区间内的月度收益。</p>'+mm+'</div>'+
     '<div class="v3-card"><h3>回撤走势</h3><div class="v3-legend"><span><i style="background:#0b8a63"></i>组合（绿色实线）</span><span><i style="background:#6f8194"></i>基准（灰色虚线）</span></div><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算；纵轴范围同时覆盖组合与基准。</div></div>';
@@ -8295,6 +8310,10 @@ bodyEl.addEventListener('click',function(e){
   if(fc){stateV3.fundCat=fc.dataset.v3Fundcat;renderBody();return}
   var fb=e.target.closest('[data-v3-fund]');
   if(fb){stateV3.fundView=fb.dataset.v3Fund;renderBody();return}
+  var srb=e.target.closest('[data-v3-stock-return]');
+  if(srb){stateV3.stockReturnView=srb.dataset.v3StockReturn;renderBody();return}
+  var brb=e.target.closest('[data-v3-bond-return]');
+  if(brb){stateV3.bondReturnView=brb.dataset.v3BondReturn;renderBody();return}
   var mb=e.target.closest('[data-v3-month]');
   if(mb){stateV3.monthView=mb.dataset.v3Month;renderBody();return}
   var go=e.target.closest('[data-v3-go]');
