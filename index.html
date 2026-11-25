@@ -7110,7 +7110,7 @@ var BM_INDUSTRY={'银行':20,'食品饮料':15,'电子':15,'电力设备':12,'�
 var TAB_LABEL={summary:'综合概览',returns:'收益分析',allocation:'持仓结构',funds:'基金/ETF资产',bonds:'债券资产',stocks:'股票资产'};
 var TAB_ORDER=['summary','returns','allocation','funds','bonds','stocks'];
 
-var stateV3={tab:'summary',spv:null,start:'',end:'',type:'all',l2:'all',q:'',industry:'',monthView:'ret',fundView:'source',fundCat:'l2',fundAssetView:'list',bondAssetView:'list',stockAssetView:'list',allocView:'look',fundPage:1,stockPage:1,fundBasis:'source',stockBasis:'source',fundsSort:{key:'close',dir:-1},stocksSort:{key:'close',dir:-1},bench:{}};
+var stateV3={tab:'summary',spv:null,start:'',end:'',type:'all',l1:'all',l2:'all',wcL1:'',wcOpen:false,q:'',industry:'',monthView:'ret',fundView:'source',fundCat:'l2',fundAssetView:'list',bondAssetView:'list',stockAssetView:'list',allocView:'look',fundPage:1,stockPage:1,fundBasis:'source',stockBasis:'source',fundsSort:{key:'close',dir:-1},stocksSort:{key:'close',dir:-1},bench:{}};
 var chartStore={};
 var current=null,cacheKey='',cacheVal=null;
 
@@ -7874,6 +7874,7 @@ function filterFunds(snap){
   var q=stateV3.q.trim().toLowerCase();
   var rows=snap.funds.filter(function(x){
     if(stateV3.type!=='all'&&x.type!==stateV3.type)return false;
+    if(stateV3.l1!=='all'&&x.l1n!==stateV3.l1)return false;
     if(stateV3.l2!=='all'&&x.l2n!==stateV3.l2)return false;
     if(q&&(x.code+x.name).toLowerCase().indexOf(q)<0)return false;
     return true;
@@ -7907,10 +7908,8 @@ function pagerHtml(kind,page,pages,count){
     '<button type="button" data-v3-page-kind="'+kind+'" data-v3-page="'+(page-1)+'" '+(page<=1?'disabled':'')+'>上一页</button>'+
     '<button type="button" data-v3-page-kind="'+kind+'" data-v3-page="'+(page+1)+'" '+(page>=pages?'disabled':'')+'>下一页</button>';
 }
-function assetViewTabs(page){
-  var v=page==='funds'?stateV3.fundAssetView:page==='bonds'?stateV3.bondAssetView:stateV3.stockAssetView;
-  return '<div class="v3-mini-tabs">'+[['list','列表'],['chart','图表']].map(function(x){return '<button type="button" data-v3-assetview="'+x[0]+'" class="'+((v||'list')===x[0]?'active':'')+'">'+x[1]+'</button>'}).join('')+'</div>';
-}
+/* 图表分析本期不做：资产 tab 仅保留列表视图 */
+function assetViewTabs(page){return ''}
 function fundValueList(rows,total){
   var max=Math.max.apply(null,rows.map(function(x){return x.close}).concat([1]));
   return '<div class="v3-rank-list">'+rows.map(function(x){
@@ -7926,8 +7925,27 @@ function fundChartView(snap){
   '</div>';
 }
 
+function windClassify(l1map){
+  var l1s=Object.keys(l1map).sort(function(a,b){return String(a).localeCompare(String(b),'zh-CN')});
+  if(!l1s.length)return '';
+  var act=stateV3.wcL1&&l1map[stateV3.wcL1]?stateV3.wcL1:l1s[0];
+  var label=stateV3.l2!=='all'?stateV3.l2:(stateV3.l1!=='all'?stateV3.l1:'请选择');
+  var left=l1s.map(function(l1){
+    var on=stateV3.l1===l1;
+    return '<div class="wc-l1'+(act===l1?' act':'')+'" data-wc-l1="'+esc(l1)+'"><input type="checkbox" data-wc-check-l1 value="'+esc(l1)+'"'+(on?' checked':'')+'><span class="wc-name">'+esc(l1)+'</span><i>›</i></div>';
+  }).join('');
+  var sub=l1map[act]||[];
+  var right=sub.map(function(l2){
+    var on=stateV3.l2===l2;
+    return '<label class="wc-l2'+(on?' act':'')+'"><input type="checkbox" data-wc-check-l2 value="'+esc(l2)+'"'+(on?' checked':'')+'><span class="wc-name">'+esc(l2)+'</span></label>';
+  }).join('')||'<div class="wc-empty">该分类下暂无二级分类</div>';
+  return '<div class="wc" id="v3-wc"><span class="wc-cap">wind分类：</span><div class="wc-box'+(stateV3.wcOpen?' open':'')+'" data-wc-box><span class="wc-val'+(label==='请选择'?' ph':'')+'">'+esc(label)+'</span><span class="wc-clear'+(label==='请选择'?' hide':'')+'" data-wc-clear title="清除">×</span><span class="wc-arrow">⌄</span>'+
+    (stateV3.wcOpen?'<div class="wc-pop"><div class="wc-col wc-left">'+left+'</div><div class="wc-col wc-right">'+right+'</div></div>':'')+'</div></div>';
+}
 function renderFunds(snap){
   var view=stateV3.fundAssetView||'list';
+  var l1map={};snap.funds.forEach(function(x){var k=x.l1n||'未分类';if(!l1map[k])l1map[k]=[];if(x.l2n&&l1map[k].indexOf(x.l2n)<0)l1map[k].push(x.l2n)});
+  Object.keys(l1map).forEach(function(k){l1map[k].sort(function(a,b){return String(a).localeCompare(String(b),'zh-CN')})});
   var l2s=[];snap.funds.forEach(function(x){if(l2s.indexOf(x.l2n)<0)l2s.push(x.l2n)});l2s.sort(function(a,b){return String(a).localeCompare(String(b),'zh-CN')});
   var allRows=filterFunds(snap);
   var ps=pageSlice(allRows,stateV3.fundPage||1,PAGE_SIZE);stateV3.fundPage=ps.page;
@@ -7942,7 +7960,7 @@ function renderFunds(snap){
     '</div>';
   var list='<div class="v3-card"><div class="v3-toolbar">'+
       '<label>基金类型<select id="v3-fund-type"><option value="all">全部基金</option><option value="etf"'+(stateV3.type==='etf'?' selected':'')+'>场内ETF/LOF</option><option value="off"'+(stateV3.type==='off'?' selected':'')+'>场外基金</option></select></label>'+
-      '<label>Wind 二级<select id="v3-fund-l2"><option value="all">全部分类</option>'+l2s.map(function(x){return '<option value="'+esc(x)+'"'+(stateV3.l2===x?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select></label>'+
+      windClassify(l1map)+
       '<label>搜索<input id="v3-fund-q" placeholder="基金代码或名称" value="'+esc(stateV3.q)+'"></label>'+
       '<div class="v3-basis-switch"><span>收益口径</span>'+fundBasisSwitch()+'</div>'+
       '<span class="v3-count" id="v3-fund-count">'+assetCountText(allRows)+'</span>'+
@@ -8174,7 +8192,7 @@ function showV3(){
 function openV3(tab){
   var s=cur();
   if(stateV3.spv!==s.id){
-    stateV3.spv=s.id;stateV3.start=s.start;stateV3.end=s.end;stateV3.type='all';stateV3.l2='all';stateV3.q='';stateV3.industry='';stateV3.monthView='ret';
+    stateV3.spv=s.id;stateV3.start=s.start;stateV3.end=s.end;stateV3.type='all';stateV3.l1='all';stateV3.l2='all';stateV3.wcL1='';stateV3.wcOpen=false;stateV3.q='';stateV3.industry='';stateV3.monthView='ret';
   }
   if(tab)stateV3.tab=tab;
   showV3();renderHead();renderBody();
@@ -8211,7 +8229,7 @@ $('v3-tabs').addEventListener('click',function(e){
 });
 $('v3-spv').addEventListener('change',function(e){
   var id=e.target.value,s=spvs.find(function(x){return x.id===id});
-  state.spv=id;stateV3.spv=id;stateV3.start=s.start;stateV3.end=s.end;stateV3.q='';stateV3.industry='';stateV3.type='all';stateV3.l2='all';stateV3.monthView='ret';
+  state.spv=id;stateV3.spv=id;stateV3.start=s.start;stateV3.end=s.end;stateV3.q='';stateV3.industry='';stateV3.type='all';stateV3.l1='all';stateV3.l2='all';stateV3.wcL1='';stateV3.wcOpen=false;stateV3.monthView='ret';
   renderHead();renderBody();
   if(typeof renderOverview==='function')renderOverview();
 });
@@ -8236,6 +8254,10 @@ bodyEl.addEventListener('click',function(e){
     else if(stateV3.tab==='stocks')stateV3.stockAssetView=v;
     renderBody();return;
   }
+  var w1=e.target.closest('[data-wc-l1]');
+  if(w1){stateV3.wcL1=w1.getAttribute('data-wc-l1');renderBody();return}
+  var wb=e.target.closest('[data-wc-box]');
+  if(wb){if(e.target.closest('[data-wc-clear]')){stateV3.l1='all';stateV3.l2='all';stateV3.wcOpen=false;stateV3.fundPage=1;renderBody();return}if(e.target.closest('[data-wc-check-l1],[data-wc-check-l2]'))return;stateV3.wcOpen=!stateV3.wcOpen;renderBody();return}
   var fc=e.target.closest('[data-v3-fundcat]');
   if(fc){stateV3.fundCat=fc.dataset.v3Fundcat;renderBody();return}
   var fb=e.target.closest('[data-v3-fund]');
@@ -8266,6 +8288,8 @@ bodyEl.addEventListener('change',function(e){
   }
   if(e.target.id==='v3-fund-type'){stateV3.type=e.target.value;stateV3.fundPage=1;refreshFunds();return}
   if(e.target.id==='v3-fund-l2'){stateV3.l2=e.target.value;stateV3.fundPage=1;refreshFunds();return}
+  if(e.target.hasAttribute&&e.target.hasAttribute('data-wc-check-l1')){if(e.target.checked){stateV3.l1=e.target.value;stateV3.l2='all'}else{stateV3.l1='all'}stateV3.fundPage=1;renderBody();return}
+  if(e.target.hasAttribute&&e.target.hasAttribute('data-wc-check-l2')){if(e.target.checked){stateV3.l2=e.target.value;stateV3.l1='all'}else{stateV3.l2='all'}stateV3.fundPage=1;renderBody();return}
   if(e.target.id==='v3-stock-industry'){stateV3.industry=e.target.value;stateV3.stockPage=1;refreshStocks();return}
 });
 bodyEl.addEventListener('input',function(e){
@@ -8277,6 +8301,11 @@ bodyEl.addEventListener('input',function(e){
     if(id==='v3-fund-q'){stateV3.fundPage=1;refreshFunds()}else{stateV3.stockPage=1;refreshStocks()}
   },180);
 });
+
+document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('#v3-wc'))return;
+  if(stateV3.wcOpen){stateV3.wcOpen=false;var pop=document.querySelector('#v3-wc .wc-pop');if(pop)pop.remove();var b=document.querySelector('#v3-wc .wc-box');if(b)b.classList.remove('open')}
+},true);
 
 function refreshFunds(){
   if(!current)return;
@@ -10818,4 +10847,35 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
 #bond-analysis .bond-table-panel{min-width:0}
 #bond-analysis .bond-table-panel .head{box-sizing:border-box}
 #bond-analysis .bond-table-panel .stock-analysis-table-wrap{overflow:auto}
+</style>
+
+<style id="wind-classify-style">
+/* ===== wind分类 级联选择（参考截图交互） ===== */
+.wc{display:flex;align-items:center;gap:8px}
+.wc-cap{font-size:12px;color:#587187;white-space:nowrap}
+.wc-box{position:relative;display:flex;align-items:center;gap:6px;min-width:170px;height:34px;padding:0 10px;border:1px solid #c7d7e4;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;color:#183b5a;user-select:none}
+.wc-box:hover{border-color:#2c78b7}
+.wc-box.open{border-color:#2c78b7;box-shadow:0 0 0 2px rgba(44,120,183,.10)}
+.wc-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wc-val.ph{color:#9aabb9}
+.wc-clear{width:16px;height:16px;line-height:14px;text-align:center;border-radius:50%;background:#eef3f8;color:#7c90a2;font-size:12px}
+.wc-clear:hover{background:#e2ecf5;color:#c0392b}
+.wc-clear.hide{display:none}
+.wc-arrow{color:#8ba1b5;font-size:14px;transform:scaleY(.8)}
+.wc-box.open .wc-arrow{transform:scaleY(-.8)}
+.wc-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:60;display:grid;grid-template-columns:190px 230px;border:1px solid #c7d7e4;border-radius:8px;background:#fff;box-shadow:0 10px 28px rgba(23,57,88,.16);overflow:hidden}
+.wc-col{max-height:280px;overflow:auto;padding:6px}
+.wc-left{border-right:1px solid #e7eef5}
+.wc-l1,.wc-l2{display:flex;align-items:center;gap:8px;height:34px;padding:0 8px;border-radius:5px;font-size:12.5px;color:#35546b;cursor:pointer;white-space:nowrap}
+.wc-l1:hover,.wc-l1.act,.wc-l2:hover,.wc-l2.act{background:#eef6fd}
+.wc-l1.act .wc-name{color:#1268bb;font-weight:600}
+.wc-l1 i{margin-left:auto;font-style:normal;color:#9aabb9}
+.wc-l2{padding-left:26px}
+.wc-empty{padding:24px 10px;text-align:center;color:#9aabb9;font-size:11px}
+.wc input[type=checkbox]{margin:0;accent-color:#1268bb}
+</style>
+<style id="wind-classify-name-style">
+.wc .wc-name{color:#3d5c76;font-weight:500}
+.wc .wc-l1.act .wc-name{color:#1268bb;font-weight:600}
+.wc .wc-l2.act .wc-name{color:#1268bb;font-weight:600}
 </style>
