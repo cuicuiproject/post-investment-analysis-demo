@@ -772,6 +772,10 @@ body.pp-lock{overflow:hidden}
 #portfolio-operations .po-chart-head-tools .po-picker-btn{height:26px;padding:0 10px;font-size:11.5px}
 </style>
 <style id="po-kpis-six-responsive">@media(max-width:1250px){#portfolio-operations .po-kpis.six{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:850px){#portfolio-operations .po-kpis.six{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+<style id="export-amber-style">
+.btn#export,.btn#export-post-data,.btn#benchmark-export,#im-export-account,#im-export-fund,.module-export-btn{background:#f3b622!important;border:1px solid #dda208!important;color:#3a2900!important;font-weight:700!important;box-shadow:0 2px 7px rgba(205,147,10,.28)!important}
+.btn#export:hover,.btn#export-post-data:hover,.btn#benchmark-export:hover,#im-export-account:hover,#im-export-fund:hover,.module-export-btn:hover{background:#e2a40f!important;border-color:#c8900a!important;color:#312200!important}
+</style>
 </head><body><div class="layout"><aside class="side"><div class="logo"><span class="brand-mark" aria-hidden="true"></span>渤银理财投后分析<span class="brand-sub">POST-INVESTMENT INTELLIGENCE</span><span class="demo-data-badge">演示数据</span></div><div class="group-title">投后分析</div><nav class="menu"><button class="active" data-page="overview">专户分析</button><button data-page="post">专户持仓分析</button><button data-page="bond-analysis" hidden>债券分析</button></nav><div class="group-title">数据维护</div><nav class="menu"><button data-page="upload">上传数据</button><button data-page="history">上传历史</button><button data-page="manage">专户管理</button></nav></aside><main class="main"><header class="top"><div id="crumb" class="crumb">专户分析 <span>/</span>专户列表</div><button class="btn" id="export">导出数据</button></header><div class="content">
 <style id="overview-hero-switch-ptype">
 #overview .overview-hero .ov-hero-view{grid-column:3;grid-row:1/3;align-self:center;justify-self:end;display:flex;align-items:center;z-index:3}
@@ -3470,10 +3474,10 @@ state.workspacePageLabels['fund-detail']='专户基金持仓';
   function bindDrill(){document.querySelectorAll('#investment-manager-analysis .im-enter-spv').forEach(function(btn){btn.onclick=function(){document.getElementById('im-linked-modal').classList.remove('show');if(typeof selectSpv==='function')selectSpv(btn.dataset.spv);else if(typeof page==='function')page('post')}})}
   function render(){renderAccounts();renderFunds()}
   function switchTab(tab){imState.tab=tab;document.querySelectorAll('.im-tab').forEach(function(x){x.classList.toggle('active',x.dataset.imTab===tab)});document.getElementById('im-view-account').classList.toggle('active',tab==='account');document.getElementById('im-view-fund').classList.toggle('active',tab==='fund')}
-  function makePage(){var el=document.createElement('section');el.className='page';el.id='page-investment-manager-analysis';el.innerHTML='<div class="im-shell"><div class="im-toolbar"><div class="im-field"><label>数据日期</label><input id="im-date" type="date" value="2026-06-30"></div><div class="im-field"><label>投资策略</label><select id="im-strategy"><option value="">全部策略</option></select></div><div class="im-field"><label>产品类型</label><select id="im-ptype"><option value="">全部类型</option><option value="outsource">委外</option><option value="channel">通道</option><option value="none">未设置</option></select></div><div></div><button class="im-btn" id="im-reset">重置</button><button class="im-btn im-btn-primary" id="im-query">查询</button></div><div class="im-tabs"><button class="im-tab active" data-im-tab="account">委外账户分析</button><button class="im-tab" data-im-tab="fund">基金收益统计</button></div><div id="im-view-account" class="im-view active"><div class="im-summary" id="im-account-summary"></div><div class="im-section-head"><div><div class="im-section-title">委外账户收益与风险指标</div><div class="im-section-note">按投资策略分组，金额单位：亿元；DV01单位：万元/BP</div></div><button class="im-btn" id="im-export-account">导出数据</button></div><div class="im-table-wrap"><table class="im-table im-account-table"><thead><tr><th>专户账户</th><th>投资策略</th><th>投资经理</th><th>单位净值</th><th>实缴资本</th><th>总资产</th><th>净资产</th><th>组合YTM</th><th>杠杆率</th><th>久期</th><th>转债仓位</th><th>近7日</th><th>近1月</th><th>今年以来</th><th>近1年</th><th>成立以来</th><th>近1月最大回撤</th><th>成立以来最大回撤</th><th>夏普比率</th><th>卡玛比率</th><th>DV01</th><th>单一基金集中度</th><th>业绩基准</th></tr></thead><tbody id="im-account-body"></tbody></table></div><div class="im-page-foot">指标由专户净值、规模和估值持仓数据自动汇总；正式上线后可替换为数仓接口结果。</div></div><div id="im-view-fund" class="im-view"><div class="im-summary" id="im-fund-summary"></div><div class="im-section-head"><div><div class="im-section-title">基金收益统计</div><div class="im-section-note">按基金类型汇总，可查看关联专户并穿透至持仓分析</div></div><div class="im-fund-controls"><select id="im-fund-type" class="im-fund-filter"><option value="">全部基金类型</option><option>短债基金</option><option>中长债基金</option><option>可转债基金</option><option>指数基金</option><option>权益基金</option><option>现金管理基金</option></select><button class="im-btn" id="im-export-fund">导出数据</button></div></div><div class="im-table-wrap"><table class="im-table im-fund-table"><thead><tr><th>基金代码</th><th>基金名称</th><th>基金类型</th><th>持仓规模（亿元）</th><th>近7日收益率</th><th>近30日收益率</th><th>持有期收益率</th><th>持有期年化收益率</th><th>收益金额（万元）</th><th>关联专户数量</th></tr></thead><tbody id="im-fund-body"></tbody></table></div><div class="im-page-foot">同一基金在不同专户中的持仓自动合并展示，收益金额包含持有、买卖及分红收益。</div></div></div><div class="im-modal" id="im-linked-modal"><div class="im-modal-card"><div class="im-modal-head"><span id="im-modal-title">关联专户</span><button class="im-modal-close" aria-label="关闭">×</button></div><div class="im-linked-list" id="im-linked-list"></div></div></div>';document.querySelector('.content').appendChild(el)}
+  function makePage(){var el=document.createElement('section');el.className='page';el.id='page-investment-manager-analysis';el.innerHTML='<div class="im-shell"><div class="im-toolbar"><div class="im-field"><label>数据日期</label><input id="im-date" type="date" value="2026-06-30"></div><div class="im-field"><label>投资策略</label><select id="im-strategy"><option value="">全部策略</option></select></div><div class="im-field"><label>产品类型</label><select id="im-ptype"><option value="">全部类型</option><option value="outsource">委外</option><option value="channel">通道</option><option value="none">未设置</option></select></div><div></div><button class="im-btn im-btn-primary" id="im-query">查询</button></div><div class="im-tabs"><button class="im-tab active" data-im-tab="account">委外账户分析</button><button class="im-tab" data-im-tab="fund">基金收益统计</button></div><div id="im-view-account" class="im-view active"><div class="im-summary" id="im-account-summary"></div><div class="im-section-head"><div><div class="im-section-title">委外账户收益与风险指标</div><div class="im-section-note">按投资策略分组，金额单位：亿元；DV01单位：万元/BP</div></div><button class="im-btn" id="im-export-account">导出数据</button></div><div class="im-table-wrap"><table class="im-table im-account-table"><thead><tr><th>专户账户</th><th>投资策略</th><th>投资经理</th><th>单位净值</th><th>实缴资本</th><th>总资产</th><th>净资产</th><th>组合YTM</th><th>杠杆率</th><th>久期</th><th>转债仓位</th><th>近7日</th><th>近1月</th><th>今年以来</th><th>近1年</th><th>成立以来</th><th>近1月最大回撤</th><th>成立以来最大回撤</th><th>夏普比率</th><th>卡玛比率</th><th>DV01</th><th>单一基金集中度</th><th>业绩基准</th></tr></thead><tbody id="im-account-body"></tbody></table></div><div class="im-page-foot">指标由专户净值、规模和估值持仓数据自动汇总；正式上线后可替换为数仓接口结果。</div></div><div id="im-view-fund" class="im-view"><div class="im-summary" id="im-fund-summary"></div><div class="im-section-head"><div><div class="im-section-title">基金收益统计</div><div class="im-section-note">按基金类型汇总，可查看关联专户并穿透至持仓分析</div></div><div class="im-fund-controls"><select id="im-fund-type" class="im-fund-filter"><option value="">全部基金类型</option><option>短债基金</option><option>中长债基金</option><option>可转债基金</option><option>指数基金</option><option>权益基金</option><option>现金管理基金</option></select><button class="im-btn" id="im-export-fund">导出数据</button></div></div><div class="im-table-wrap"><table class="im-table im-fund-table"><thead><tr><th>基金代码</th><th>基金名称</th><th>基金类型</th><th>持仓规模（亿元）</th><th>近7日收益率</th><th>近30日收益率</th><th>持有期收益率</th><th>持有期年化收益率</th><th>收益金额（万元）</th><th>关联专户数量</th></tr></thead><tbody id="im-fund-body"></tbody></table></div><div class="im-page-foot">同一基金在不同专户中的持仓自动合并展示，收益金额包含持有、买卖及分红收益。</div></div></div><div class="im-modal" id="im-linked-modal"><div class="im-modal-card"><div class="im-modal-head"><span id="im-modal-title">关联专户</span><button class="im-modal-close" aria-label="关闭">×</button></div><div class="im-linked-list" id="im-linked-list"></div></div></div>';document.querySelector('.content').appendChild(el)}
   function normalizeAccountHeader(){var row=document.querySelector('.im-account-table thead tr');if(!row)return;var headers=['账户名称','正式起始运作时间','当日净值','实收资本（亿元）','总资产（亿元）','净资产（亿元）','静态YTM','杠杆','组合行权久期（年）','转债仓位','近7日年化收益率','近1个月年化收益率','今年以来年化收益率','近一年年化收益率','成立以来年化收益率','年初至今最大回撤','自正式运作以来最大回撤','夏普比率','卡玛比率','DV01','单一资产最大占比'];row.innerHTML=headers.map(function(text){return '<th>'+text+'</th>'}).join('')}
   function makeNav(){var created=document.getElementById('page-investment-manager-analysis');if(created)created.id='investment-manager-analysis';normalizeAccountHeader();var post=document.querySelector('.menu [data-page="post"]');if(!post)return;var a=post.cloneNode(false);a.dataset.page='investment-manager-analysis';a.textContent='投资经理分析';a.classList.remove('active');post.insertAdjacentElement('afterend',a);a.onclick=function(){if(typeof page==='function')page('investment-manager-analysis');render();window.scrollTo(0,0)}}
-  function init(){makePage();makeNav();if(typeof infos!=='undefined')infos['investment-manager-analysis']=['专户汇总','投资经理分析'];var sel=document.getElementById('im-strategy');Object.keys(STRATEGIES).map(function(k){return STRATEGIES[k]}).filter(function(v,i,a){return a.indexOf(v)===i}).forEach(function(v){sel.insertAdjacentHTML('beforeend','<option>'+v+'</option>')});document.getElementById('im-query').onclick=function(){imState.strategy=document.getElementById('im-strategy').value;imState.ptype=document.getElementById('im-ptype').value;render()};document.getElementById('im-reset').onclick=function(){document.getElementById('im-strategy').value='';document.getElementById('im-ptype').value='';imState.manager='';imState.strategy='';imState.ptype='';render()};document.querySelectorAll('.im-tab').forEach(function(b){b.onclick=function(){switchTab(b.dataset.imTab)}});document.getElementById('im-fund-type').onchange=function(){imState.fundType=this.value;renderFunds()};document.getElementById('im-export-account').onclick=function(){if(typeof toast==='function')toast('委外账户分析数据已导出')};document.getElementById('im-export-fund').onclick=function(){if(typeof toast==='function')toast('基金收益统计数据已导出')};document.querySelector('#im-linked-modal .im-modal-close').onclick=function(){document.getElementById('im-linked-modal').classList.remove('show')};document.getElementById('im-linked-modal').onclick=function(e){if(e.target===this)this.classList.remove('show')};render()}
+  function init(){makePage();makeNav();if(typeof infos!=='undefined')infos['investment-manager-analysis']=['专户汇总','投资经理分析'];var sel=document.getElementById('im-strategy');Object.keys(STRATEGIES).map(function(k){return STRATEGIES[k]}).filter(function(v,i,a){return a.indexOf(v)===i}).forEach(function(v){sel.insertAdjacentHTML('beforeend','<option>'+v+'</option>')});document.getElementById('im-query').onclick=function(){imState.strategy=document.getElementById('im-strategy').value;imState.ptype=document.getElementById('im-ptype').value;render()};(function(){var resetBtn=document.getElementById('im-reset');if(!resetBtn)return;resetBtn.onclick=function(){document.getElementById('im-strategy').value='';document.getElementById('im-ptype').value='';imState.manager='';imState.strategy='';imState.ptype='';render()}})();document.querySelectorAll('.im-tab').forEach(function(b){b.onclick=function(){switchTab(b.dataset.imTab)}});document.getElementById('im-fund-type').onchange=function(){imState.fundType=this.value;renderFunds()};document.getElementById('im-export-account').onclick=function(){if(typeof toast==='function')toast('委外账户分析数据已导出')};document.getElementById('im-export-fund').onclick=function(){if(typeof toast==='function')toast('基金收益统计数据已导出')};document.querySelector('#im-linked-modal .im-modal-close').onclick=function(){document.getElementById('im-linked-modal').classList.remove('show')};document.getElementById('im-linked-modal').onclick=function(e){if(e.target===this)this.classList.remove('show')};render()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
@@ -3594,7 +3598,7 @@ state.workspacePageLabels['fund-detail']='专户基金持仓';
 (function(){
   function selectTab(tabs,button){tabs.querySelectorAll('.im-strategy-tab').forEach(function(item){item.setAttribute('aria-selected',item===button?'true':'false')})}
   function apply(select,tabs,button){selectTab(tabs,button);select.value=button.dataset.strategy;document.getElementById('im-query').click()}
-  function init(){var view=document.getElementById('im-view-account'),select=document.getElementById('im-strategy');if(!view||!select||document.getElementById('im-account-strategy-tabs'))return;var field=select.closest('.im-field');if(field)field.style.display='none';var strategies=Array.from(select.options).map(function(o){return o.value}).filter(Boolean),tabs=document.createElement('div');tabs.id='im-account-strategy-tabs';tabs.className='im-account-strategy-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','投资策略');strategies.forEach(function(strategy,index){var button=document.createElement('button');button.type='button';button.className='im-strategy-tab';button.textContent=strategy;button.dataset.strategy=strategy;button.setAttribute('role','tab');button.setAttribute('aria-selected',index===0?'true':'false');button.onclick=function(){apply(select,tabs,button)};tabs.appendChild(button)});var head=view.querySelector('.im-section-head');head.insertAdjacentElement('beforebegin',tabs);var first=tabs.querySelector('.im-strategy-tab');if(first)apply(select,tabs,first);document.getElementById('im-reset').addEventListener('click',function(){setTimeout(function(){if(first)apply(select,tabs,first)},0)});var fundTab=document.querySelector('.im-tab[data-im-tab="fund"]'),accountTab=document.querySelector('.im-tab[data-im-tab="account"]');if(fundTab)fundTab.addEventListener('click',function(){setTimeout(function(){select.value='';document.getElementById('im-query').click()},0)});if(accountTab)accountTab.addEventListener('click',function(){setTimeout(function(){var active=tabs.querySelector('[aria-selected="true"]')||first;if(active)apply(select,tabs,active)},0)})}
+  function init(){var view=document.getElementById('im-view-account'),select=document.getElementById('im-strategy');if(!view||!select||document.getElementById('im-account-strategy-tabs'))return;var field=select.closest('.im-field');if(field)field.style.display='none';var strategies=Array.from(select.options).map(function(o){return o.value}).filter(Boolean),tabs=document.createElement('div');tabs.id='im-account-strategy-tabs';tabs.className='im-account-strategy-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','投资策略');strategies.forEach(function(strategy,index){var button=document.createElement('button');button.type='button';button.className='im-strategy-tab';button.textContent=strategy;button.dataset.strategy=strategy;button.setAttribute('role','tab');button.setAttribute('aria-selected',index===0?'true':'false');button.onclick=function(){apply(select,tabs,button)};tabs.appendChild(button)});var head=view.querySelector('.im-section-head');head.insertAdjacentElement('beforebegin',tabs);var first=tabs.querySelector('.im-strategy-tab');if(first)apply(select,tabs,first);var resetBtn2=document.getElementById('im-reset');if(resetBtn2)resetBtn2.addEventListener('click',function(){setTimeout(function(){if(first)apply(select,tabs,first)},0)});var fundTab=document.querySelector('.im-tab[data-im-tab="fund"]'),accountTab=document.querySelector('.im-tab[data-im-tab="account"]');if(fundTab)fundTab.addEventListener('click',function(){setTimeout(function(){select.value='';document.getElementById('im-query').click()},0)});if(accountTab)accountTab.addEventListener('click',function(){setTimeout(function(){var active=tabs.querySelector('[aria-selected="true"]')||first;if(active)apply(select,tabs,active)},0)})}
   document.addEventListener('click',function(event){var target=event.target.closest('.im-tab');if(!target)return;var select=document.getElementById('im-strategy'),query=document.getElementById('im-query'),tabs=document.getElementById('im-account-strategy-tabs');if(!select||!query)return;if(target.dataset.imTab==='fund'){select.value='';query.click()}else if(target.dataset.imTab==='account'&&tabs){var active=tabs.querySelector('[aria-selected="true"]');if(active){select.value=active.dataset.strategy;query.click()}}},true);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(init,0)});else setTimeout(init,0);
   function removeAccountFootnote(){var foot=document.querySelector('#im-view-account .im-page-foot');if(foot&&foot.textContent.indexOf('指标由专户净值、规模和估值持仓数据自动汇总')>-1)foot.remove()}
@@ -6413,7 +6417,6 @@ init();
   <div class="field"><label>专户范围</label><select class="select"><option>全部专户（3 户）</option><option>渤银测试专户A</option><option>渤银测试专户B</option><option>渤银测试专户C</option></select></div>
   <div class="field"><label>券种</label><select class="select"><option value="">全部券种</option><option>国债</option><option>政策性金融债</option><option>地方政府债</option><option>短期融资券</option><option>中期票据</option><option>企业债</option><option>可转债</option><option>同业存单</option></select></div>
   <button class="btn" id="bond-analysis-query">查询</button>
-  <div class="ov-view-switch" role="group" aria-label="展示方式" style="margin-left:auto"><button type="button" class="active" data-bond-view="list">列表</button><button type="button" data-bond-view="chart">图表</button></div>
 </div>
 
 <div class="bond-kpis">
@@ -6427,7 +6430,7 @@ init();
 <div class="stock-analysis-grid">
   <div>
     <div class="panel bond-table-panel">
-      <div class="head"><div><h2 style="margin:0">跨账户同券明细</h2><p>同一债券在多个专户的持仓合并为一行，点击可展开各专户的持有数量与成本。</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="select"><option value="">全部评级</option><option>AAA</option><option>AA+</option><option>AA</option></select><input placeholder="搜索债券代码或名称"></div></div>
+      <div class="head"><div><h2 style="margin:0">跨账户同券明细</h2><p>同一债券在多个专户的持仓合并为一行，点击可展开各专户的持有数量与成本。</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="select"><option value="">全部评级</option><option>AAA</option><option>AA+</option><option>AA</option></select><input placeholder="搜索债券代码或名称"><div class="ov-view-switch" role="group" aria-label="展示方式"><button type="button" class="active" data-bond-view="list">列表</button><button type="button" data-bond-view="chart">图表</button></div></div></div>
       <div class="stock-analysis-table-wrap"><table class="stock-analysis-table"><thead><tr><th>债券代码</th><th>债券名称</th><th>券种</th><th>评级</th><th>到期日</th><th>修正久期</th><th>涉及专户</th><th>期末市值（万元）</th><th>占债券市值</th><th>区间收益（万元）</th><th>区间收益率</th></tr></thead><tbody>
         <tr><td>240203.IB</td><td>24国开03</td><td>政策性金融债</td><td>AAA</td><td>2029-04-15</td><td>3.12</td><td>3 户</td><td>1,286.40</td><td>14.9%</td><td class="up">+14.97</td><td class="up">+1.16%</td></tr>
         <tr><td>230018.IB</td><td>23附息国债18</td><td>国债</td><td>AAA</td><td>2028-09-20</td><td>2.86</td><td>2 户</td><td>980.25</td><td>11.3%</td><td class="up">+7.12</td><td class="up">+0.73%</td></tr>
@@ -6658,7 +6661,7 @@ body.si-lock{overflow:hidden}
  var section=document.createElement('section');
  section.className='page';section.id='stock-investment';
  section.innerHTML=''+
-  '<div class="si-filter"><div class="si-field"><label>申万一级行业</label><select id="si-industry"><option value="">全部行业</option></select></div><div class="si-field"><label>搜索</label><input id="si-q" placeholder="股票代码或名称"></div><button class="btn" id="si-query">查询</button><button class="btn white" id="si-reset">重置</button><span class="si-filter-note">同一股票在多产品中的持仓已合并</span></div>'+
+  '<div class="si-filter"><div class="si-field"><label>申万一级行业</label><select id="si-industry"><option value="">全部行业</option></select></div><div class="si-field"><label>搜索</label><input id="si-q" placeholder="股票代码或名称"></div><button class="btn white" id="si-reset">重置</button><button class="btn" id="si-query">查询</button><span class="si-filter-note">同一股票在多产品中的持仓已合并</span></div>'+
   '<div class="si-kpis" id="si-kpis"></div>'+
   '<div class="si-grid"><section class="si-panel"><div class="si-panel-head"><div><h3>穿透后股票持仓</h3><p id="si-table-sub"></p></div><span class="si-filter-note">点击行查看产品分布</span></div><div class="si-table-wrap"><table class="si-table"><thead><tr><th>股票</th><th>申万一级行业</th><th>持有产品</th><th>持仓市值（亿元）</th><th>占股票组合</th><th>区间收益</th><th>收益金额（亿元）</th><th>收益贡献</th></tr></thead><tbody id="si-body"></tbody></table></div><div class="si-foot" id="si-foot"></div></section></div>';
  host.appendChild(section);
@@ -9057,12 +9060,12 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
   }
   function placeStockExport(){
     var page=document.getElementById('stock-investment');
-    var query=page&&page.querySelector('#si-query');
+    var head=page&&page.querySelector('.si-panel-head');
     var row=page&&page.querySelector(':scope > .module-export-row');
-    var button=row&&row.querySelector('.module-export-btn');
-    if(!query||!button)return false;
-    query.insertAdjacentElement('afterend',button);
-    row.remove();
+    var button=(row&&row.querySelector('.module-export-btn'))||(head&&head.querySelector('.module-export-btn'));
+    if(!head||!button)return false;
+    if(button.parentElement!==head)head.appendChild(button);
+    if(row&&row.parentElement)row.remove();
     return true;
   }
   function place(){placeInvestmentManagerExports();placeStockExport()}
@@ -10756,3 +10759,63 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
 })();
 </script>
 
+
+<style id="bond-stock-topbar-unify-style">
+/* ===== 债券/股票 顶部与委外账户统一：白卡筛选条 · 标签与控件同行 · 控件等高 · 查询靠右 ===== */
+#bond-analysis .stock-analysis-controls,
+#stock-investment .si-filter{
+  display:flex!important;align-items:center;flex-wrap:wrap;gap:14px;
+  padding:10px 16px!important;margin-bottom:12px!important;
+  border:1px solid #d5e1eb!important;border-radius:10px!important;
+  background:#fff!important;box-shadow:0 1px 2px rgba(23,57,88,.04)!important
+}
+#bond-analysis .stock-analysis-controls .field,
+#stock-investment .si-filter .si-field{
+  display:flex!important;align-items:center;gap:8px;min-width:0;font-size:12px;color:#587187
+}
+#bond-analysis .stock-analysis-controls .field>label,
+#stock-investment .si-filter .si-field>label{
+  font-size:12px!important;font-weight:500!important;color:#587187!important;white-space:nowrap
+}
+#bond-analysis .stock-analysis-controls .select,
+#bond-analysis .stock-analysis-controls input,
+#stock-investment .si-filter .select,
+#stock-investment .si-filter input{
+  height:34px!important;padding:0 10px!important;border:1px solid #c7d7e4!important;border-radius:6px!important;
+  background:#fff!important;color:#183b5a!important;font-size:13px!important;outline:none
+}
+#bond-analysis .stock-analysis-controls .select:focus,
+#stock-investment .si-filter .select:focus,
+#stock-investment .si-filter input:focus{border-color:#2c78b7!important;box-shadow:0 0 0 2px rgba(44,120,183,.10)}
+#bond-analysis .stock-analysis-controls .btn,
+#stock-investment .si-filter .btn{height:34px;padding:0 18px;border-radius:6px;font-size:13px}
+#bond-analysis .stock-analysis-controls .btn{margin-left:auto}
+#stock-investment .si-filter .si-filter-note{margin-left:auto;color:#9aabb9;font-size:10px}
+/* ===== 指标卡统一 ===== */
+#bond-analysis .bond-kpis,#stock-investment .si-kpis{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 12px!important
+}
+#bond-analysis .bond-kpi,#stock-investment .si-kpi{
+  min-height:78px!important;padding:11px 14px!important;border:1px solid #dce6ef!important;border-top:0!important;
+  border-radius:9px!important;background:#fff!important;box-shadow:0 1px 2px rgba(23,57,88,.04)
+}
+#bond-analysis .bond-kpi span,#stock-investment .si-kpi .lab{font-size:11px!important;color:#72869a!important;min-height:20px;line-height:1.35}
+#bond-analysis .bond-kpi strong,#stock-investment .si-kpi .val{margin-top:6px!important;font:700 20px Arial,"Microsoft YaHei"!important;color:#173f61!important;font-variant-numeric:tabular-nums}
+#bond-analysis .bond-kpi strong.up{color:#d53d43!important}
+#bond-analysis .bond-kpi strong.down{color:#078164!important}
+#stock-investment .si-kpi .val small{margin-left:2px;font:400 9px "Microsoft YaHei";color:#7c90a2}
+#stock-investment .si-kpi .foot{margin-top:3px;font-size:9px;color:#8a9cab;line-height:1.35}
+/* ===== 区块头操作按钮 ===== */
+#stock-investment .si-panel-head .module-export-btn{height:30px;margin-left:10px;box-shadow:none!important}
+#bond-analysis .bond-table-panel .head .ov-view-switch{margin-left:2px}
+@media(max-width:1100px){#bond-analysis .bond-kpis,#stock-investment .si-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){#bond-analysis .bond-kpis,#stock-investment .si-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<style id="bond-overflow-fix-style">
+/* 债券：表格面板随容器收窄，避免右侧内容溢出到视口外 */
+#bond-analysis .stock-analysis-grid{min-width:0}
+#bond-analysis .stock-analysis-grid>div{min-width:0}
+#bond-analysis .bond-table-panel{min-width:0}
+#bond-analysis .bond-table-panel .head{box-sizing:border-box}
+#bond-analysis .bond-table-panel .stock-analysis-table-wrap{overflow:auto}
+</style>
