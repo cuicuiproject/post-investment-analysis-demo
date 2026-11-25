@@ -7669,7 +7669,7 @@ function renderReturns(snap){
       '<div class="v3-card"><h3>股票收益来源</h3><p class="sub">持仓涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 股票区间收益；分红按行业模拟估算，交易收益按买卖成交额比例拆分。</p>'+signedBars(snap.stockSources.concat([{label:'合计',value:snap.stockIncome,total:true}]))+'</div>'+
       bondCard+
     '</div>'+
-    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3>'+mtabs+'</div><p class="sub">按年份 × 12 个月展示当前数据区间内的月度收益。</p>'+mm+'<div class="v3-note">当前数据区间自 '+snap.s.start+' 起；空白为区间外或未来月份，接入更早净值后自动扩展年份行。</div></div>'+
+    '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3>'+mtabs+'</div><p class="sub">按年份 × 12 个月展示当前数据区间内的月度收益。</p>'+mm+'</div>'+
     '<div class="v3-card"><h3>回撤走势</h3><div class="v3-legend"><span><i style="background:#0b8a63"></i>组合（绿色实线）</span><span><i style="background:#6f8194"></i>基准（灰色虚线）</span></div><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算；纵轴范围同时覆盖组合与基准。</div></div>';
 }
 
@@ -8445,6 +8445,11 @@ window.selectSpv=selectSpv=function(id){
 };
 
 window.spvHoldingCount=function(id){return fundsFor(id).length+DEMO_STOCKS.length};
+window.spvMaxDrawdown=function(id){
+  var s=spvs.find(function(x){return x.id===id});
+  if(!s)return null;
+  try{return snapshot(id,s.start,s.end).met.mdd}catch(e){return null}
+};
 window.spvTotalIncome=function(id){
   var s=spvs.find(function(x){return x.id===id});
   if(!s)return 0;
@@ -8524,16 +8529,18 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
     return list.map(function(s){
       var income=(typeof spvTotalIncome==='function')?spvTotalIncome(s.id):0;
       var holds=(typeof spvHoldingCount==='function')?spvHoldingCount(s.id):0;
+      var mdd=(typeof spvMaxDrawdown==='function')?spvMaxDrawdown(s.id):null;
+      var holdTitle='基金与股票持仓合计';
       return '<tr data-spv-id="'+s.id+'"'+(s.id===state.spv?' class="selected"':'')+'>'+
         '<td title="区间 '+s.start+' ~ '+s.end+' · 最新估值 '+s.latest+'"><div class="ov-name">'+s.name+(s.ptype?'<span class="ov-ptype '+s.ptype+'">'+(s.ptype==='outsource'?'委外':'通道')+'</span>':'')+'</div>'+(s.alias?'<div class="ov-alias">'+String(s.alias).split(',')[0]+'</div>':'')+'</td>'+
         '<td>'+s.code+'</td>'+
         '<td>'+(s.manager||'—')+'</td>'+
         '<td>'+(s.strategy||'—')+'</td>'+
         '<td class="num">'+(s.asset/10000).toLocaleString()+'</td>'+
-        '<td class="num">'+s.nav.toFixed(4)+'</td>'+
         '<td class="num"><span class="'+(s.ret>=0?'up':'down')+'">'+sign(s.ret)+'</span></td>'+
-        '<td class="num">'+holds+' 只</td>'+
         '<td class="num"><span class="'+(income>=0?'up':'down')+'">'+money(income)+'</span></td>'+
+        '<td class="num"><span class="'+(mdd<0?'down':'')+'">'+(mdd==null?'—':(mdd>0?'+':'')+mdd.toFixed(2)+'%')+'</span></td>'+
+        '<td class="num" title="'+holdTitle+'">'+holds+' 只</td>'+
         '<td class="ov-period">'+s.latest+'</td>'+
         '<td><button type="button" class="ov-enter" tabindex="-1">进入分析</button></td></tr>';
     }).join('');
@@ -8555,8 +8562,8 @@ if(document.getElementById('post')&&document.getElementById('post').classList.co
     var list=(typeof onlineSpvs==='function')?onlineSpvs():spvs;
     grid.innerHTML='<div class="ov-list-wrap"><table class="ov-list"><thead><tr>'+
       '<th>专户产品</th><th>产品代码</th><th>投资经理</th><th>投资策略</th>'+
-      '<th class="num">资产规模（万元）</th><th class="num">单位净值</th><th class="num">区间收益率</th>'+
-      '<th class="num">基金持仓</th><th class="num">基金总收益（元）</th><th>最新估值日</th><th>操作</th>'+
+      '<th class="num">资产规模（万元）</th><th class="num">区间收益率</th><th class="num">区间收益（元）</th>'+
+      '<th class="num">最大回撤</th><th class="num">持仓数量</th><th>最新估值日</th><th>操作</th>'+
       '</tr></thead><tbody>'+rowsHtml(list)+'</tbody></table></div>';
     grid.querySelectorAll('tr[data-spv-id]').forEach(function(tr){tr.onclick=function(){selectSpv(tr.dataset.spvId)}});
   };
