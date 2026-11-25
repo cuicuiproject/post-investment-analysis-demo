@@ -6891,6 +6891,7 @@ body.v3-on #spv-detail-context,body.v3-on #export,body.v3-on .workspace-tabs{dis
 #spv-detail-v3 .v3-hover-line{stroke:#7b8fa1;stroke-width:1;stroke-dasharray:3 3;pointer-events:none}
 #spv-detail-v3 .v3-hover-dot-p{fill:#d33c43;stroke:#fff;stroke-width:1.5;pointer-events:none}
 #spv-detail-v3 .v3-hover-dot-b{fill:#8397aa;stroke:#fff;stroke-width:1.5;pointer-events:none}
+#spv-detail-v3 [data-v3-chart="dd"] .v3-hover-dot-p{fill:#0b8a63}
 
 #spv-detail-v3 .v3-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:2px 0 0;color:#6b8195;font-size:11px}
 #spv-detail-v3 .v3-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
@@ -7453,7 +7454,8 @@ function ddChart(snap){
   var sr=snap.series,d=sr.dates,N=d.length;
   var host=document.getElementById('v3-body');
   var W=Math.max(760,Math.round(host&&host.clientWidth?host.clientWidth-40:1200)),H=200,L=48,R=14,T=12,B=26;
-  var lo=Math.min.apply(null,sr.dd)*1.15||-1,hi=0;
+  var minDd=Math.min.apply(null,sr.dd.concat(sr.bdd,[0]));
+  var lo=minDd<0?minDd*1.15:-1,hi=0;
   function x(i){return L+(N>1?i*(W-L-R)/(N-1):0)}
   function y(v){return T+(hi-v)/(hi-lo)*(H-T-B)}
   var area='M'+x(0).toFixed(1)+' '+y(0).toFixed(1)+' ';
@@ -7474,9 +7476,11 @@ function ddChart(snap){
     grid+='<line x1="'+xx.toFixed(1)+'" y1="'+T+'" x2="'+xx.toFixed(1)+'" y2="'+(H-B)+'" stroke="#edf2f6" stroke-width="1" stroke-dasharray="3 4"/>';
   });
   var xlab=ticks.map(function(t){return '<text x="'+x(t).toFixed(1)+'" y="'+(H-6)+'" text-anchor="'+(t===0?'start':t===N-1?'end':'middle')+'" font-size="10" fill="#8a9dad">'+md(d[t])+'</text>'}).join('');
+  var benchLine=sr.bdd.map(function(v,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)}).join(' ');
   chartStore.dd={dates:d,series:sr.dd,bench:sr.bdd,lo:lo,hi:hi,W:W,H:H,L:L,R:R,T:T,B:B,mode:'dd'};
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="回撤走势" data-v3-chart="dd">'+grid+
-    '<path d="'+area+'" fill="rgba(8,125,103,.16)" stroke="#0b8a63" stroke-width="1.8" stroke-linejoin="round"/>'+xlab+
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="组合与基准回撤走势" data-v3-chart="dd">'+grid+
+    '<path d="'+area+'" fill="rgba(8,125,103,.12)" stroke="#0b8a63" stroke-width="1.8" stroke-linejoin="round"/>'+
+    '<path d="'+benchLine+'" fill="none" stroke="#6f8194" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round"/>'+xlab+
     '<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)+'" fill="#fff" fill-opacity="0" pointer-events="all"/>'+
     '<g class="v3-hover" style="display:none"><line class="v3-hover-line" x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'"/><circle class="v3-hover-dot-p" r="3.6"/><circle class="v3-hover-dot-b" r="3"/></g>'+
   '</svg>';
@@ -7658,15 +7662,15 @@ function renderReturns(snap){
       '<div class="v3-stat"><span>股票贡献（元）</span><strong class="'+cls(snap.stockIncome)+'">'+num(snap.stockIncome,2)+'</strong></div>'+
     '</div>'+
     '<div class="v3-grid-2 even">'+
-      '<div class="v3-card"><h3>专户收益来源</h3><p class="sub">非债基金（含货币）/ 债券 / 股票 / 未投资现金，各项互斥，合计等于区间收益金额；债券收益来自债券型基金。</p>'+signedBars(src)+'</div>'+
+      '<div class="v3-card"><h3>专户收益来源</h3><p class="sub">非债基金（含货币）/ 债券 / 股票 / 未投资现金，各项互斥，合计等于区间收益金额；债券收益来自债券型基金。</p>'+signedBars(src.concat([{label:'合计',value:snap.total,total:true}]))+'</div>'+
       '<div class="v3-card"><div class="v3-card-head"><h3>'+ftitle+'</h3>'+ftabs+'</div><p class="sub">'+fsub+'</p>'+signedBars(fbars)+(fnote?'<div class="v3-note">'+fnote+'</div>':'')+'</div>'+
     '</div>'+
     '<div class="v3-grid-2 even">'+
-      '<div class="v3-card"><h3>股票收益来源</h3><p class="sub">持仓涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 股票区间收益；分红按行业模拟估算，交易收益按买卖成交额比例拆分。</p>'+signedBars(snap.stockSources)+'</div>'+
+      '<div class="v3-card"><h3>股票收益来源</h3><p class="sub">持仓涨跌 ＋ 买入交易 ＋ 卖出交易 ＋ 现金分红 ＝ 股票区间收益；分红按行业模拟估算，交易收益按买卖成交额比例拆分。</p>'+signedBars(snap.stockSources.concat([{label:'合计',value:snap.stockIncome,total:true}]))+'</div>'+
       bondCard+
     '</div>'+
     '<div class="v3-card"><div class="v3-card-head"><h3>月度收益率</h3>'+mtabs+'</div><p class="sub">按年份 × 12 个月展示当前数据区间内的月度收益；蓝色底为当前筛选区间；基准为模拟。</p>'+mm+'<div class="v3-note">当前数据区间自 '+snap.s.start+' 起；空白为区间外或未来月份，接入更早净值后自动扩展年份行。</div></div>'+
-    '<div class="v3-card"><h3>回撤走势</h3><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'；鼠标滑过查看每日数据。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算。</div></div>';
+    '<div class="v3-card"><h3>回撤走势</h3><div class="v3-legend"><span><i style="background:#0b8a63"></i>组合（绿色实线）</span><span><i style="background:#6f8194"></i>基准（灰色虚线）</span></div><p class="sub">组合最大回撤 '+pct(snap.met.mdd)+'，基准 '+pct(snap.met.bmdd)+'；鼠标滑过查看每日数据。</p><div class="v3-chart">'+ddChart(snap)+'</div><div class="v3-note">回撤按区间内净值高点回落的幅度计算；纵轴范围同时覆盖组合与基准。</div></div>';
 }
 
 function fundCatTable(snap,rows){
